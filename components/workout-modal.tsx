@@ -1,0 +1,273 @@
+"use client"
+
+import { useState, useEffect } from "react"
+import type { DayPlan } from "@/app/page"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
+import { Dumbbell, Moon, Plus, X, Clock } from "lucide-react"
+import { cn } from "@/lib/utils"
+
+interface WorkoutModalProps {
+  isOpen: boolean
+  onClose: () => void
+  day: DayPlan | null
+  onSave: (day: DayPlan) => void
+  readOnly?: boolean
+}
+
+const EXERCISE_SUGGESTIONS = [
+  "Push-ups",
+  "Squats",
+  "Plank",
+  "Lunges",
+  "Burpees",
+  "Deadlifts",
+  "Bench Press",
+  "Pull-ups",
+  "Running",
+  "Cycling",
+]
+
+const DURATION_PRESETS = [15, 30, 45, 60, 90]
+
+export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false }: WorkoutModalProps) {
+  const [type, setType] = useState<"workout" | "rest">("workout")
+  const [exercises, setExercises] = useState<string[]>([])
+  const [newExercise, setNewExercise] = useState("")
+  const [duration, setDuration] = useState<number | undefined>(undefined)
+  const [notes, setNotes] = useState("")
+
+  useEffect(() => {
+    if (day) {
+      setType(day.type === "rest" ? "rest" : "workout")
+      setExercises(day.exercises || [])
+      setDuration(day.duration)
+      setNotes(day.notes || "")
+    }
+  }, [day])
+
+  const handleAddExercise = () => {
+    if (newExercise.trim() && !exercises.includes(newExercise.trim())) {
+      setExercises([...exercises, newExercise.trim()])
+      setNewExercise("")
+    }
+  }
+
+  const handleRemoveExercise = (exercise: string) => {
+    setExercises(exercises.filter((e) => e !== exercise))
+  }
+
+  const handleSuggestionClick = (suggestion: string) => {
+    if (!exercises.includes(suggestion)) {
+      setExercises([...exercises, suggestion])
+    }
+  }
+
+  const handleSave = () => {
+    if (day) {
+      // Don't allow empty days to be marked as completed
+      const shouldBeCompleted = type !== "empty" && day.completed
+      
+      onSave({
+        ...day,
+        type,
+        exercises: type === "workout" ? exercises : undefined,
+        duration: type === "workout" ? duration : undefined,
+        notes: notes.trim() || undefined,
+        completed: shouldBeCompleted,
+      })
+    }
+  }
+
+  if (!day) return null
+
+  const dateStr = day.date.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+  })
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
+        <DialogHeader>
+          <DialogTitle className="text-foreground">{readOnly ? "View Day" : "Plan Your Day"}</DialogTitle>
+          <DialogDescription>{dateStr}</DialogDescription>
+        </DialogHeader>
+
+        <div className="mt-4 space-y-6">
+          <div className="flex gap-3">
+            <button
+              onClick={() => !readOnly && setType("workout")}
+              disabled={readOnly}
+              className={cn(
+                "flex flex-1 flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
+                type === "workout"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                readOnly && "cursor-default opacity-75",
+              )}
+            >
+              <Dumbbell className="h-6 w-6" />
+              <span className="text-sm font-medium">Workout</span>
+            </button>
+            <button
+              onClick={() => !readOnly && setType("rest")}
+              disabled={readOnly}
+              className={cn(
+                "flex flex-1 flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
+                type === "rest"
+                  ? "border-primary bg-primary/10 text-primary"
+                  : "border-border bg-card text-muted-foreground hover:border-primary/50",
+                readOnly && "cursor-default opacity-75",
+              )}
+            >
+              <Moon className="h-6 w-6" />
+              <span className="text-sm font-medium">Rest Day</span>
+            </button>
+          </div>
+
+          {type === "workout" && (
+            <div className="space-y-4">
+              <div>
+                <Label className="text-foreground flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Session Duration
+                </Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {DURATION_PRESETS.map((preset) => (
+                    <button
+                      key={preset}
+                      onClick={() => !readOnly && setDuration(preset)}
+                      disabled={readOnly}
+                      className={cn(
+                        "rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
+                        duration === preset
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-border bg-secondary text-secondary-foreground hover:border-primary/50",
+                        readOnly && "opacity-50 cursor-default",
+                      )}
+                    >
+                      {preset} min
+                    </button>
+                  ))}
+                </div>
+                <div className="mt-2 flex items-center gap-2">
+                  <Input
+                    type="number"
+                    value={duration || ""}
+                    onChange={(e) => setDuration(e.target.value ? Number.parseInt(e.target.value) : undefined)}
+                    placeholder="Custom duration"
+                    className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+                    min={1}
+                    disabled={readOnly}
+                  />
+                  <span className="text-sm text-muted-foreground">minutes</span>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="exercise" className="text-foreground">
+                  Add Exercise
+                </Label>
+                <div className="mt-2 flex gap-2">
+                  <Input
+                    id="exercise"
+                    value={newExercise}
+                    onChange={(e) => setNewExercise(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && !readOnly && handleAddExercise()}
+                    placeholder="e.g., Push-ups"
+                    className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+                    disabled={readOnly}
+                  />
+                  <Button onClick={handleAddExercise} size="icon" className="shrink-0" disabled={readOnly}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              {exercises.length > 0 && (
+                <div>
+                  <Label className="text-foreground">Your Exercises</Label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {exercises.map((exercise) => (
+                      <span
+                        key={exercise}
+                        className="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1.5 text-sm font-medium text-primary"
+                      >
+                        {exercise}
+                        {!readOnly && (
+                          <button
+                            onClick={() => handleRemoveExercise(exercise)}
+                            className="rounded-full p-0.5 hover:bg-primary/30"
+                          >
+                            <X className="h-3 w-3" />
+                          </button>
+                        )}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <Label className="text-foreground">Quick Add</Label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {EXERCISE_SUGGESTIONS.filter((s) => !exercises.includes(s)).map((suggestion) => (
+                    <button
+                      key={suggestion}
+                      onClick={() => !readOnly && handleSuggestionClick(suggestion)}
+                      disabled={readOnly}
+                      className="rounded-full border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {suggestion}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {type === "rest" && (
+            <div className="rounded-xl bg-secondary/50 p-4 text-center">
+              <Moon className="mx-auto h-12 w-12 text-muted-foreground" />
+              <p className="mt-2 text-sm text-muted-foreground">
+                Recovery is just as important as training. Take this day to rest and recharge.
+              </p>
+            </div>
+          )}
+
+          <div>
+            <Label htmlFor="notes" className="text-foreground">
+              Notes
+            </Label>
+            <Textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder={
+                type === "workout" ? "e.g., Focus on form, increase weight..." : "e.g., Active recovery, stretching..."
+              }
+              className="mt-2 min-h-[80px] resize-none bg-secondary border-border text-foreground placeholder:text-muted-foreground"
+              disabled={readOnly}
+            />
+          </div>
+
+          <div className="flex gap-3">
+            <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent">
+              {readOnly ? "Close" : "Cancel"}
+            </Button>
+            {!readOnly && (
+              <Button onClick={handleSave} className="flex-1">
+                Save Plan
+              </Button>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}
