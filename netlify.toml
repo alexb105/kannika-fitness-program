@@ -7,4 +7,6 @@
 [build.environment]
   NODE_VERSION = "22.21.1"
   PNPM_VERSION = "10.23.0"
+  # These are public environment variables meant to be exposed to client-side code
+  SECRETS_SCAN_OMIT_KEYS = "NEXT_PUBLIC_SUPABASE_URL,NEXT_PUBLIC_SUPABASE_ANON_KEY,NEXT_PUBLIC_APP_PASSWORD"
 
