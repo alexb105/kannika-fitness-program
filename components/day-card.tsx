@@ -1,12 +1,14 @@
 "use client"
 
-import { memo, useCallback } from "react"
+import { memo, useCallback, useMemo } from "react"
 import type { DayPlan } from "@/app/page"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Calendar, Dumbbell, Moon, Clock, StickyNote, Check, X } from "lucide-react"
 import { isToday, formatDate } from "@/lib/date-utils"
+import { useLanguage } from "@/lib/contexts/language-context"
+import { translateExercises } from "@/lib/translations"
 
 interface DayCardProps {
   day: DayPlan
@@ -18,10 +20,17 @@ interface DayCardProps {
 }
 
 export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComplete, onToggleMissed, trainerColor = "blue" }: DayCardProps) {
+  const { t, language } = useLanguage()
   const today = isToday(day.date)
   const isCompleted = day.completed === true
   const isMissed = day.missed === true
   const isPurple = trainerColor === "purple"
+  
+  // Translate exercises for display
+  const translatedExercises = useMemo(() => {
+    if (!day.exercises || day.exercises.length === 0) return []
+    return translateExercises(day.exercises, language)
+  }, [day.exercises, language])
 
   const handleToggleComplete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -46,7 +55,7 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
       onKeyDown={handleKeyDown}
       role="button"
       tabIndex={0}
-      aria-label={`${today ? "Today" : formatDate(day.date)} - ${day.type === "workout" ? "Workout" : day.type === "rest" ? "Rest Day" : "Tap to plan"}`}
+      aria-label={`${today ? t("today") : formatDate(day.date)} - ${day.type === "workout" ? t("workout") : day.type === "rest" ? t("restDay") : t("tapToPlan")}`}
       className={cn(
         "relative cursor-pointer overflow-hidden border-border/50 p-4 transition-all duration-200",
         "hover:scale-[1.02] hover:border-primary/50 hover:shadow-lg",
@@ -93,35 +102,35 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               isCompleted && "line-through text-muted-foreground",
               isMissed && "line-through text-destructive"
             )}>
-              {today ? "Today" : formatDate(day.date)}
+              {today ? t("today") : formatDate(day.date)}
             </p>
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               {day.type === "workout" && (
                 <>
-                  <span>{day.exercises?.length || 0} exercises</span>
+                  <span>{day.exercises?.length || 0} {t("exercises")}</span>
                   {day.duration && (
                     <>
                       <span className="text-border">•</span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {day.duration} min
+                        {day.duration} {t("min")}
                       </span>
                     </>
                   )}
                 </>
               )}
-              {day.type === "rest" && "Rest Day"}
-              {day.type === "empty" && "Tap to plan"}
+              {day.type === "rest" && t("restDay")}
+              {day.type === "empty" && t("tapToPlan")}
               {isCompleted && (
                 <>
                   <span className="text-border">•</span>
-                  <span className={isPurple ? "text-purple-600 dark:text-purple-400" : "text-green-600 dark:text-green-400"}>Completed</span>
+                  <span className={isPurple ? "text-purple-600 dark:text-purple-400" : "text-green-600 dark:text-green-400"}>{t("completedLabel")}</span>
                 </>
               )}
               {isMissed && (
                 <>
                   <span className="text-border">•</span>
-                  <span className="text-destructive">Missed</span>
+                  <span className="text-destructive">{t("missedLabel")}</span>
                 </>
               )}
             </div>
@@ -134,7 +143,7 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               onClick={handleToggleMissed}
               variant={isMissed ? "default" : "outline"}
               size="icon-sm"
-              aria-label={isMissed ? "Unmark as missed" : "Mark as missed"}
+              aria-label={isMissed ? t("sessionUnmarked") : t("sessionMarkedMissed")}
               className={cn(
                 "h-8 w-8 rounded-full transition-all",
                 isMissed && "bg-destructive hover:bg-destructive/90 text-white border-destructive",
@@ -146,7 +155,7 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               onClick={handleToggleComplete}
               variant={isCompleted ? "default" : "outline"}
               size="icon-sm"
-              aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
+              aria-label={isCompleted ? t("workoutUnmarked") : t("workoutCompleted")}
               className={cn(
                 "h-8 w-8 rounded-full transition-all",
                 isCompleted && (isPurple 
@@ -161,9 +170,9 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
         )}
       </div>
 
-      {day.type === "workout" && day.exercises && day.exercises.length > 0 && (
+      {day.type === "workout" && translatedExercises && translatedExercises.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-2">
-          {day.exercises.slice(0, 3).map((exercise, i) => (
+          {translatedExercises.slice(0, 3).map((exercise, i) => (
             <span 
               key={i} 
               className={cn(
@@ -174,9 +183,9 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               {exercise}
             </span>
           ))}
-          {day.exercises.length > 3 && (
+          {translatedExercises.length > 3 && (
             <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              +{day.exercises.length - 3} more
+              +{translatedExercises.length - 3} more
             </span>
           )}
         </div>

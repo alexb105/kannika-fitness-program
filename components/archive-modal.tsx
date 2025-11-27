@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useMemo } from "react"
 import type { DayPlan } from "@/app/page"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
@@ -10,6 +10,8 @@ import { WorkoutModal } from "@/components/workout-modal"
 import { useArchivedDays } from "@/lib/hooks/use-archived-days"
 import { Archive, Calendar, Dumbbell, Moon, Clock, StickyNote, Check, Eye, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { useLanguage } from "@/lib/contexts/language-context"
+import { translateExercises } from "@/lib/translations"
 
 interface ArchiveModalProps {
   isOpen: boolean
@@ -28,6 +30,7 @@ function formatDate(date: Date): string {
 }
 
 export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: ArchiveModalProps) {
+  const { t, language } = useLanguage()
   const { archivedDays, loading, fetchArchivedDays, deleteArchivedDay } = useArchivedDays({ trainerName })
   const [selectedDay, setSelectedDay] = useState<DayPlan | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
@@ -70,34 +73,34 @@ export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: Archiv
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Archive className="h-5 w-5 text-muted-foreground" />
-            <DialogTitle className="text-foreground">{trainerName}'s Archive</DialogTitle>
+            <DialogTitle className="text-foreground">{trainerName}'s {t("archive")}</DialogTitle>
           </div>
           <DialogDescription>
-            View all archived workout days. Archived days are automatically created when you add more than 7 days.
+            {t("archive")}
           </DialogDescription>
         </DialogHeader>
 
         <div className="mt-4">
           {loading ? (
             <div className="flex items-center justify-center py-12">
-              <p className="text-sm text-muted-foreground">Loading archived days...</p>
+              <p className="text-sm text-muted-foreground">Loading...</p>
             </div>
           ) : archivedDays.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
               <Archive className="h-12 w-12 text-muted-foreground/50 mb-4" />
-              <p className="text-sm text-muted-foreground">No archived days yet</p>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Days are automatically archived when you add more than 7 days
-              </p>
+              <p className="text-sm text-muted-foreground">{t("noArchivedDays")}</p>
             </div>
           ) : (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground mb-4">
-                {archivedDays.length} archived day{archivedDays.length !== 1 ? "s" : ""}
+                {archivedDays.length} {t("archive")}
               </p>
               <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-2">
                 {archivedDays.map((day) => {
                   const isCompleted = day.completed === true
+                  const translatedExercises = day.exercises && day.exercises.length > 0 
+                    ? translateExercises(day.exercises, language)
+                    : []
                   return (
                     <Card
                       key={day.id}
@@ -141,24 +144,24 @@ export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: Archiv
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                               {day.type === "workout" && (
                                 <>
-                                  <span>{day.exercises?.length || 0} exercises</span>
+                                  <span>{day.exercises?.length || 0} {t("exercises")}</span>
                                   {day.duration && (
                                     <>
                                       <span className="text-border">•</span>
                                       <span className="flex items-center gap-1">
                                         <Clock className="h-3 w-3" />
-                                        {day.duration} min
+                                        {day.duration} {t("min")}
                                       </span>
                                     </>
                                   )}
                                 </>
                               )}
-                              {day.type === "rest" && "Rest Day"}
-                              {day.type === "empty" && "Empty"}
+                              {day.type === "rest" && t("restDay")}
+                              {day.type === "empty" && t("tapToPlan")}
                               {isCompleted && (
                                 <>
                                   <span className="text-border">•</span>
-                                  <span className="text-green-600 dark:text-green-400">Completed</span>
+                                  <span className="text-green-600 dark:text-green-400">{t("completedLabel")}</span>
                                 </>
                               )}
                             </div>
@@ -173,7 +176,7 @@ export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: Archiv
                               handleViewDay(day)
                             }}
                             className="h-8 w-8"
-                            title="View Details"
+                            title={t("view")}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -182,23 +185,23 @@ export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: Archiv
                             size="icon-sm"
                             onClick={(e) => handleDeleteClick(day, e)}
                             className="h-8 w-8 text-destructive hover:text-destructive"
-                            title="Delete"
+                            title={t("delete")}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>
 
-                      {day.type === "workout" && day.exercises && day.exercises.length > 0 && (
+                      {day.type === "workout" && translatedExercises && translatedExercises.length > 0 && (
                         <div className="mt-3 flex flex-wrap gap-2">
-                          {day.exercises.slice(0, 3).map((exercise, i) => (
+                          {translatedExercises.slice(0, 3).map((exercise, i) => (
                             <span key={i} className="rounded-full bg-primary/20 px-2.5 py-1 text-xs font-medium text-primary">
                               {exercise}
                             </span>
                           ))}
-                          {day.exercises.length > 3 && (
+                          {translatedExercises.length > 3 && (
                             <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
-                              +{day.exercises.length - 3} more
+                              +{translatedExercises.length - 3} more
                             </span>
                           )}
                         </div>
@@ -235,23 +238,22 @@ export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: Archiv
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Delete Archived Day?</AlertDialogTitle>
+            <AlertDialogTitle>{t("delete")}?</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to permanently delete this archived day? This action cannot be undone.
               {dayToDelete && (
                 <span className="block mt-2 font-medium">
-                  {formatDate(dayToDelete.date)} - {dayToDelete.type === "workout" ? "Workout" : dayToDelete.type === "rest" ? "Rest Day" : "Empty"}
+                  {formatDate(dayToDelete.date)} - {dayToDelete.type === "workout" ? t("workout") : dayToDelete.type === "rest" ? t("restDay") : t("tapToPlan")}
                 </span>
               )}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmDelete}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              Delete
+              {t("delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

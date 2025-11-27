@@ -9,7 +9,9 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Dumbbell, Moon, Plus, X, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { EXERCISE_SUGGESTIONS, DURATION_PRESETS, STORAGE_KEYS } from "@/lib/constants"
+import { DURATION_PRESETS, STORAGE_KEYS } from "@/lib/constants"
+import { useLanguage } from "@/lib/contexts/language-context"
+import { getExerciseSuggestions } from "@/lib/translations"
 
 interface WorkoutModalProps {
   isOpen: boolean
@@ -54,12 +56,16 @@ const saveCustomExercise = (trainerId: string | undefined, exercise: string) => 
 }
 
 export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, trainerId }: WorkoutModalProps) {
+  const { t, language } = useLanguage()
   const [type, setType] = useState<"workout" | "rest">("workout")
   const [exercises, setExercises] = useState<string[]>([])
   const [newExercise, setNewExercise] = useState("")
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [notes, setNotes] = useState("")
   const [customExercises, setCustomExercises] = useState<string[]>([])
+  
+  // Get exercise suggestions based on current language
+  const exerciseSuggestions = useMemo(() => getExerciseSuggestions(language), [language])
 
   useEffect(() => {
     if (day) {
@@ -104,13 +110,13 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
       setExercises((prev) => [...prev, suggestion])
       
       // Save to custom exercises if it's a custom one (not in default suggestions)
-      if (trainerId && !EXERCISE_SUGGESTIONS.includes(suggestion)) {
+      if (trainerId && !exerciseSuggestions.includes(suggestion)) {
         saveCustomExercise(trainerId, suggestion)
         const custom = loadCustomExercises(trainerId)
         setCustomExercises(custom)
       }
     }
-  }, [exercises, trainerId])
+  }, [exercises, trainerId, exerciseSuggestions])
 
   const handleSave = useCallback(() => {
     if (day) {
@@ -120,7 +126,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
       // Save all custom exercises (not in default suggestions) to trainer's custom list
       if (trainerId && type === "workout" && exercises.length > 0) {
         exercises.forEach((exercise) => {
-          if (!EXERCISE_SUGGESTIONS.includes(exercise)) {
+          if (!exerciseSuggestions.includes(exercise)) {
             saveCustomExercise(trainerId, exercise)
           }
         })
@@ -168,7 +174,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-foreground">{readOnly ? "View Day" : "Plan Your Day"}</DialogTitle>
+          <DialogTitle className="text-foreground">{readOnly ? t("viewDay") : t("planYourDay")}</DialogTitle>
           <DialogDescription>{dateStr}</DialogDescription>
         </DialogHeader>
 
@@ -186,7 +192,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
               )}
             >
               <Dumbbell className="h-6 w-6" />
-              <span className="text-sm font-medium">Workout</span>
+              <span className="text-sm font-medium">{t("workout")}</span>
             </button>
             <button
               onClick={() => !readOnly && setType("rest")}
@@ -200,7 +206,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
               )}
             >
               <Moon className="h-6 w-6" />
-              <span className="text-sm font-medium">Rest Day</span>
+              <span className="text-sm font-medium">{t("rest")}</span>
             </button>
           </div>
 
@@ -209,7 +215,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
               <div>
                 <Label className="text-foreground flex items-center gap-2">
                   <Clock className="h-4 w-4" />
-                  Session Duration
+                  {t("sessionDuration")}
                 </Label>
                 <div className="mt-2 flex flex-wrap gap-2">
                   {DURATION_PRESETS.map((preset) => (
@@ -234,18 +240,18 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
                     type="number"
                     value={duration || ""}
                     onChange={(e) => setDuration(e.target.value ? Number.parseInt(e.target.value) : undefined)}
-                    placeholder="Custom duration"
+                    placeholder={t("sessionDuration")}
                     className="bg-secondary border-border text-foreground placeholder:text-muted-foreground"
                     min={1}
                     disabled={readOnly}
                   />
-                  <span className="text-sm text-muted-foreground">minutes</span>
+                  <span className="text-sm text-muted-foreground">{t("minutes")}</span>
                 </div>
               </div>
 
               <div>
                 <Label htmlFor="exercise" className="text-foreground">
-                  Add Exercise
+                  {t("addExercise")}
                 </Label>
                 <div className="mt-2 flex gap-2">
                   <Input
@@ -265,7 +271,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
 
               {exercises.length > 0 && (
                 <div>
-                  <Label className="text-foreground">Your Exercises</Label>
+                  <Label className="text-foreground">{t("yourExercises")}</Label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {exercises.map((exercise) => (
                       <span
@@ -290,7 +296,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
               {/* Custom Exercises (Previously Used) */}
               {customExercises.length > 0 && (
                 <div>
-                  <Label className="text-foreground">Your Previous Exercises</Label>
+                  <Label className="text-foreground">{t("yourPreviousExercises")}</Label>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {customExercises
                       .filter((s) => !exercises.includes(s))
@@ -310,9 +316,9 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
 
               {/* Default Exercise Suggestions */}
               <div>
-                <Label className="text-foreground">Quick Add</Label>
+                <Label className="text-foreground">{t("quickAdd")}</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {EXERCISE_SUGGESTIONS
+                  {exerciseSuggestions
                     .filter((s) => !exercises.includes(s) && !customExercises.includes(s))
                     .map((suggestion) => (
                       <button
@@ -333,14 +339,14 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
             <div className="rounded-xl bg-secondary/50 p-4 text-center">
               <Moon className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-2 text-sm text-muted-foreground">
-                Recovery is just as important as training. Take this day to rest and recharge.
+                {t("rest")}
               </p>
             </div>
           )}
 
           <div>
             <Label htmlFor="notes" className="text-foreground">
-              Notes
+              {t("notes")}
             </Label>
             <Textarea
               id="notes"
@@ -356,11 +362,11 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
 
           <div className="flex gap-3">
             <Button variant="outline" onClick={onClose} className="flex-1 bg-transparent">
-              {readOnly ? "Close" : "Cancel"}
+              {readOnly ? t("close") : t("cancel")}
             </Button>
             {!readOnly && (
               <Button onClick={handleSave} className="flex-1">
-                Save Plan
+                {t("savePlan")}
               </Button>
             )}
           </div>

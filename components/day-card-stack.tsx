@@ -4,6 +4,7 @@ import type { DayPlan } from "@/app/page"
 import { DayCard } from "./day-card"
 import { Button } from "@/components/ui/button"
 import { Plus } from "lucide-react"
+import { useLanguage } from "@/lib/contexts/language-context"
 
 interface DayCardStackProps {
   days: DayPlan[]
@@ -15,6 +16,8 @@ interface DayCardStackProps {
 }
 
 export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, onToggleMissed, trainerColor }: DayCardStackProps) {
+  const { t } = useLanguage()
+  
   return (
     <div className="mx-auto w-full">
       <div className="relative flex flex-col gap-3">
@@ -35,7 +38,7 @@ export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, onT
           className="mt-2 w-full border-dashed hover:border-primary/50 hover:bg-primary/5"
         >
           <Plus className="h-4 w-4" />
-          Add Day
+          {t("addDay")}
         </Button>
       </div>
     </div>

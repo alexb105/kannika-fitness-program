@@ -10,6 +10,8 @@ import { Archive } from "lucide-react"
 import { useTrainerDays } from "@/lib/hooks/use-trainer-days"
 import { useToast } from "@/hooks/use-toast"
 import { TrainerScheduleSkeleton } from "@/components/loading-skeleton"
+import { useLanguage } from "@/lib/contexts/language-context"
+import { TRAINER_NAMES } from "@/lib/constants"
 
 interface TrainerScheduleProps {
   trainerName: string
@@ -23,6 +25,7 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
     trainerName,
   })
   const { toast } = useToast()
+  const { t } = useLanguage()
   const [selectedDay, setSelectedDay] = useState<DayPlan | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isArchiveOpen, setIsArchiveOpen] = useState(false)
@@ -44,8 +47,8 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
       setIsModalOpen(false)
       
       toast({
-        title: "Day saved",
-        description: `Your ${updatedDay.type === "workout" ? "workout" : "rest day"} has been saved.`,
+        title: t("daySaved"),
+        description: `${updatedDay.type === "workout" ? t("workout") : t("rest")} ${t("daySaved").toLowerCase()}`,
       })
       
       // If this is a workout and completion status changed, update stats
@@ -57,8 +60,8 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
     } catch (error) {
       console.error("Error saving day:", error)
       toast({
-        title: "Error",
-        description: "Failed to save day. Please try again.",
+        title: t("error"),
+        description: t("failedToSave"),
         variant: "destructive",
       })
     }
@@ -68,14 +71,14 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
     try {
       await addDay()
       toast({
-        title: "Day added",
-        description: "A new day has been added to your schedule.",
+        title: t("dayAdded"),
+        description: t("dayAdded"),
       })
     } catch (error) {
       console.error("Error adding day:", error)
       toast({
-        title: "Error",
-        description: "Failed to add day. Please try again.",
+        title: t("error"),
+        description: t("failedToAdd"),
         variant: "destructive",
       })
     }
@@ -97,10 +100,10 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
       await toggleComplete(dayId)
       
       toast({
-        title: wasCompleted ? "Workout unmarked" : "Workout completed!",
+        title: wasCompleted ? t("workoutUnmarked") : t("workoutCompleted"),
         description: wasCompleted 
-          ? "The workout has been unmarked as complete."
-          : "Great job! Keep up the momentum! 💪",
+          ? t("workoutUnmarked")
+          : t("workoutCompleted"),
       })
       
       // If this was a workout day, update the competition stats
@@ -112,8 +115,8 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
     } catch (error) {
       console.error("Error toggling completion:", error)
       toast({
-        title: "Error",
-        description: "Failed to update completion status. Please try again.",
+        title: t("error"),
+        description: t("failedToUpdate"),
         variant: "destructive",
       })
     }
@@ -134,16 +137,16 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
       await toggleMissed(dayId)
       
       toast({
-        title: wasMissed ? "Session unmarked" : "Session marked as missed",
+        title: wasMissed ? t("sessionUnmarked") : t("sessionMarkedMissed"),
         description: wasMissed 
-          ? "The session has been unmarked as missed."
-          : "The session has been marked as missed.",
+          ? t("sessionUnmarked")
+          : t("sessionMarkedMissed"),
       })
     } catch (error) {
       console.error("Error toggling missed status:", error)
       toast({
-        title: "Error",
-        description: "Failed to update missed status. Please try again.",
+        title: t("error"),
+        description: t("failedToUpdateMissed"),
         variant: "destructive",
       })
     }
@@ -155,7 +158,7 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
   )
 
   const trainerColor = useMemo(() => 
-    trainerName.toLowerCase() === "kannika" ? "purple" : "blue",
+    trainerName.toLowerCase() === TRAINER_NAMES.KANNIKA.toLowerCase() ? "purple" : "blue",
     [trainerName]
   )
 
@@ -168,18 +171,18 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
       <div className="mb-4 text-center">
         <div className="flex items-center justify-center gap-2 mb-2">
           <h2 className="text-xl font-bold text-foreground">{trainerName}</h2>
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            onClick={() => setIsArchiveOpen(true)}
-            className="h-8 w-8"
-            title="View Archive"
-          >
-            <Archive className="h-4 w-4" />
-          </Button>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={() => setIsArchiveOpen(true)}
+                  className="h-8 w-8"
+                  title={t("viewArchive")}
+                >
+                  <Archive className="h-4 w-4" />
+                </Button>
         </div>
         <p className="mt-1 text-sm text-muted-foreground">
-          {completedWorkouts} workout{completedWorkouts !== 1 ? "s" : ""} completed
+          {completedWorkouts} {completedWorkouts !== 1 ? t("workoutsPlural") : t("workouts")} {t("completed")}
         </p>
       </div>
 

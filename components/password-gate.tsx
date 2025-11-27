@@ -8,8 +8,10 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { Lock } from "lucide-react"
 import { STORAGE_KEYS, AUTH_EXPIRY_DAYS } from "@/lib/constants"
+import { useLanguage } from "@/lib/contexts/language-context"
 
 export function PasswordGate({ children }: PasswordGateProps) {
+  const { t } = useLanguage()
   const [password, setPassword] = useState("")
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [error, setError] = useState("")
@@ -86,7 +88,7 @@ export function PasswordGate({ children }: PasswordGateProps) {
       localStorage.setItem(STORAGE_KEYS.AUTH_TIMESTAMP, Date.now().toString())
       setIsAuthenticated(true)
     } else {
-      setError("Incorrect password. Please try again.")
+      setError(t("incorrectPassword"))
       setPassword("")
     }
   }
@@ -107,9 +109,9 @@ export function PasswordGate({ children }: PasswordGateProps) {
             <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
               <Lock className="h-8 w-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground">Password Required</h1>
+            <h1 className="text-2xl font-bold text-foreground">{t("passwordRequired")}</h1>
             <p className="mt-2 text-sm text-muted-foreground">
-              Please enter the password to access this application
+              {t("enterPassword")}
             </p>
           </div>
 
@@ -119,7 +121,7 @@ export function PasswordGate({ children }: PasswordGateProps) {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
+                placeholder={t("enterPassword")}
                 className="w-full"
                 autoFocus
               />
@@ -138,12 +140,12 @@ export function PasswordGate({ children }: PasswordGateProps) {
                 htmlFor="remember"
                 className="text-sm font-normal cursor-pointer"
               >
-                Remember me (auto-sign in for 1 year)
+                {t("rememberMe")}
               </Label>
             </div>
 
             <Button type="submit" className="w-full">
-              Access Application
+              {t("accessApplication")}
             </Button>
           </form>
         </Card>

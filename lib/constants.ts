@@ -32,6 +32,7 @@ export const STORAGE_KEYS = {
   AUTH: "app_authenticated",
   AUTH_TIMESTAMP: "app_auth_timestamp",
   CUSTOM_EXERCISES: (trainerId: string) => `trainer_exercises_${trainerId}`,
+  LANGUAGE: "app_language",
 } as const
 
 // Auth expiry (days)

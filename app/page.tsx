@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useCompetitionStats } from "@/lib/hooks/use-competition-stats"
 import { ProgressBarSkeleton } from "@/components/loading-skeleton"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useLanguage } from "@/lib/contexts/language-context"
 import { cn } from "@/lib/utils"
 import { TRAINER_IDS, TRAINER_NAMES, STORAGE_KEYS } from "@/lib/constants"
 
@@ -26,6 +28,7 @@ export interface DayPlan {
 
 export default function FitnessSchedule() {
   const { alexander, kannika, loading: statsLoading, refetch: refetchStats } = useCompetitionStats()
+  const { t } = useLanguage()
   
   // Load saved tab from localStorage or default to "alexander"
   const [activeTab, setActiveTab] = useState<string>(() => {
@@ -75,19 +78,21 @@ export default function FitnessSchedule() {
   return (
     <main className="min-h-screen bg-background px-4 py-8 md:px-8">
       <header className="relative mb-8 text-center">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleLogout}
-          className="absolute right-0 top-0"
-          title="Logout"
-        >
-          <LogOut className="h-4 w-4" />
-        </Button>
+        <div className="absolute right-0 top-0 flex items-center gap-2">
+          <LanguageSwitcher />
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleLogout}
+            title={t("logout")}
+          >
+            <LogOut className="h-4 w-4" />
+          </Button>
+        </div>
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary">
           <Dumbbell className="h-7 w-7 text-primary-foreground" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground">Fitness Challenge</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("fitnessChallenge")}</h1>
       </header>
 
       {/* Dual Competing Progress Bars */}
@@ -107,8 +112,8 @@ export default function FitnessSchedule() {
               {/* Alexander's Progress Bar */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-foreground">Alexander</span>
-                  <span className="text-muted-foreground">{alexander} workout{alexander !== 1 ? "s" : ""}</span>
+                  <span className="font-medium text-foreground">{t("alexander")}</span>
+                  <span className="text-muted-foreground">{alexander} {alexander !== 1 ? t("workoutsPlural") : t("workouts")}</span>
                 </div>
                 <div className="relative h-8 rounded-full overflow-hidden bg-secondary border border-border">
                   <div
@@ -137,8 +142,8 @@ export default function FitnessSchedule() {
               {/* Kannika's Progress Bar */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-sm">
-                  <span className="font-medium text-foreground">Kannika</span>
-                  <span className="text-muted-foreground">{kannika} workout{kannika !== 1 ? "s" : ""}</span>
+                  <span className="font-medium text-foreground">{t("kannika")}</span>
+                  <span className="text-muted-foreground">{kannika} {kannika !== 1 ? t("workoutsPlural") : t("workouts")}</span>
                 </div>
                 <div className="relative h-8 rounded-full overflow-hidden bg-secondary border border-border">
                   <div
@@ -167,7 +172,7 @@ export default function FitnessSchedule() {
 
             {winner === "tie" && (alexander > 0 || kannika > 0) && !statsLoading && (
               <p className="mt-4 text-center text-sm text-muted-foreground">
-                It's a tie! Both trainers are working hard 💪
+                {t("itsATie")}
               </p>
             )}
           </Card>
@@ -182,13 +187,13 @@ export default function FitnessSchedule() {
               value="alexander"
               className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
             >
-              Alexander
+              {t("alexander")}
             </TabsTrigger>
             <TabsTrigger 
               value="kannika"
               className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
             >
-              Kannika
+              {t("kannika")}
             </TabsTrigger>
           </TabsList>
           <TabsContent value="alexander" className="mt-6">
