@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo, useCallback } from "react"
 import type { DayPlan } from "@/app/page"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Dumbbell, Moon, Plus, X, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { EXERCISE_SUGGESTIONS, DURATION_PRESETS, STORAGE_KEYS } from "@/lib/constants"
 
 interface WorkoutModalProps {
   isOpen: boolean
@@ -19,27 +20,10 @@ interface WorkoutModalProps {
   trainerId?: string
 }
 
-const EXERCISE_SUGGESTIONS = [
-  "Push-ups",
-  "Squats",
-  "Plank",
-  "Lunges",
-  "Burpees",
-  "Deadlifts",
-  "Bench Press",
-  "Pull-ups",
-  "Running",
-  "Cycling",
-]
-
-const DURATION_PRESETS = [15, 30, 45, 60, 90]
-
-const getCustomExercisesKey = (trainerId: string) => `trainer_exercises_${trainerId}`
-
 const loadCustomExercises = (trainerId?: string): string[] => {
   if (!trainerId || typeof window === "undefined") return []
   try {
-    const stored = localStorage.getItem(getCustomExercisesKey(trainerId))
+    const stored = localStorage.getItem(STORAGE_KEYS.CUSTOM_EXERCISES(trainerId))
     return stored ? JSON.parse(stored) : []
   } catch {
     return []
@@ -60,7 +44,7 @@ const saveCustomExercise = (trainerId: string | undefined, exercise: string) => 
     if (!exists) {
       const updated = [...customExercises, exercise.trim()]
       localStorage.setItem(
-        getCustomExercisesKey(trainerId),
+        STORAGE_KEYS.CUSTOM_EXERCISES(trainerId),
         JSON.stringify(updated)
       )
     }
@@ -94,10 +78,10 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
     }
   }, [isOpen, trainerId])
 
-  const handleAddExercise = () => {
+  const handleAddExercise = useCallback(() => {
     const trimmedExercise = newExercise.trim()
     if (trimmedExercise && !exercises.includes(trimmedExercise)) {
-      setExercises([...exercises, trimmedExercise])
+      setExercises((prev) => [...prev, trimmedExercise])
       
       // Save to custom exercises for this trainer
       if (trainerId) {
@@ -109,15 +93,15 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
       
       setNewExercise("")
     }
-  }
+  }, [newExercise, exercises, trainerId])
 
-  const handleRemoveExercise = (exercise: string) => {
-    setExercises(exercises.filter((e) => e !== exercise))
-  }
+  const handleRemoveExercise = useCallback((exercise: string) => {
+    setExercises((prev) => prev.filter((e) => e !== exercise))
+  }, [])
 
-  const handleSuggestionClick = (suggestion: string) => {
+  const handleSuggestionClick = useCallback((suggestion: string) => {
     if (!exercises.includes(suggestion)) {
-      setExercises([...exercises, suggestion])
+      setExercises((prev) => [...prev, suggestion])
       
       // Save to custom exercises if it's a custom one (not in default suggestions)
       if (trainerId && !EXERCISE_SUGGESTIONS.includes(suggestion)) {
@@ -126,9 +110,9 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
         setCustomExercises(custom)
       }
     }
-  }
+  }, [exercises, trainerId])
 
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (day) {
       // Don't allow empty days to be marked as completed
       const shouldBeCompleted = type !== "empty" && day.completed
@@ -154,15 +138,31 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
         completed: shouldBeCompleted,
       })
     }
-  }
+  }, [day, type, exercises, duration, notes, trainerId, onSave])
+
+  // Keyboard shortcut: Escape to close
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen && !readOnly) {
+        onClose()
+      }
+    }
+    if (isOpen) {
+      window.addEventListener("keydown", handleEscape)
+      return () => window.removeEventListener("keydown", handleEscape)
+    }
+  }, [isOpen, onClose, readOnly])
+
+  const dateStr = useMemo(() => {
+    if (!day) return ""
+    return day.date.toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    })
+  }, [day])
 
   if (!day) return null
-
-  const dateStr = day.date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-  })
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -312,16 +312,18 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
               <div>
                 <Label className="text-foreground">Quick Add</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {EXERCISE_SUGGESTIONS.filter((s) => !exercises.includes(s) && !customExercises.includes(s)).map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      onClick={() => !readOnly && handleSuggestionClick(suggestion)}
-                      disabled={readOnly}
-                      className="rounded-full border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {suggestion}
-                    </button>
-                  ))}
+                  {EXERCISE_SUGGESTIONS
+                    .filter((s) => !exercises.includes(s) && !customExercises.includes(s))
+                    .map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        onClick={() => !readOnly && handleSuggestionClick(suggestion)}
+                        disabled={readOnly}
+                        className="rounded-full border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
                 </div>
               </div>
             </div>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
 
 interface CompetitionStats {
@@ -18,7 +18,7 @@ export function useCompetitionStats() {
     error: null,
   })
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
       setStats((prev) => ({ ...prev, loading: true, error: null }))
 
@@ -74,7 +74,7 @@ export function useCompetitionStats() {
         error: err as Error,
       }))
     }
-  }
+  }, [])
 
   useEffect(() => {
     fetchStats()
@@ -125,7 +125,7 @@ export function useCompetitionStats() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [fetchStats])
 
   return { ...stats, refetch: fetchStats }
 }

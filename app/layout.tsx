@@ -2,6 +2,8 @@ import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Geist, Geist_Mono } from "next/font/google"
 import { AppWrapper } from "@/components/app-wrapper"
+import { Toaster } from "@/components/ui/toaster"
+import { ErrorBoundary } from "@/components/error-boundary"
 import "./globals.css"
 
 const _geist = Geist({ subsets: ["latin"] })
@@ -47,9 +49,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <AppWrapper>
-          {children}
-        </AppWrapper>
+        <ErrorBoundary>
+          <AppWrapper>
+            {children}
+          </AppWrapper>
+          <Toaster />
+        </ErrorBoundary>
       </body>
     </html>
   )

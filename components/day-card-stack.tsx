@@ -15,7 +15,7 @@ interface DayCardStackProps {
 
 export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, trainerColor }: DayCardStackProps) {
   return (
-    <div className="mx-auto max-w-md">
+    <div className="mx-auto w-full">
       <div className="relative flex flex-col gap-3">
         {days.map((day, index) => (
           <DayCard 

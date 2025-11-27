@@ -1,13 +1,15 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useCallback } from "react"
 import { TrainerSchedule } from "@/components/trainer-schedule"
-import { Dumbbell, Trophy, LogOut } from "lucide-react"
+import { Dumbbell, LogOut } from "lucide-react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { useCompetitionStats } from "@/lib/hooks/use-competition-stats"
+import { ProgressBarSkeleton } from "@/components/loading-skeleton"
 import { cn } from "@/lib/utils"
+import { TRAINER_IDS, TRAINER_NAMES, STORAGE_KEYS } from "@/lib/constants"
 
 export interface DayPlan {
   id: string
@@ -41,11 +43,11 @@ export default function FitnessSchedule() {
     return (kannika / maxWorkouts) * 100
   }, [kannika, maxWorkouts])
 
-  const handleLogout = () => {
-    localStorage.removeItem("app_authenticated")
-    localStorage.removeItem("app_auth_timestamp")
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem(STORAGE_KEYS.AUTH)
+    localStorage.removeItem(STORAGE_KEYS.AUTH_TIMESTAMP)
     window.location.reload()
-  }
+  }, [])
 
   return (
     <main className="min-h-screen bg-background px-4 py-8 md:px-8">
@@ -66,7 +68,16 @@ export default function FitnessSchedule() {
       </header>
 
       {/* Dual Competing Progress Bars */}
-      {!statsLoading && (
+      {statsLoading ? (
+        <div className="mx-auto mb-8 max-w-4xl">
+          <Card className="p-6">
+            <div className="space-y-4">
+              <ProgressBarSkeleton />
+              <ProgressBarSkeleton />
+            </div>
+          </Card>
+        </div>
+      ) : (
         <div className="mx-auto mb-8 max-w-4xl">
           <Card className="p-6">
             <div className="space-y-4">
@@ -141,7 +152,7 @@ export default function FitnessSchedule() {
       )}
 
       {/* Two Trainer Schedules in Tabs */}
-      <div className="mx-auto max-w-md">
+      <div className="mx-auto max-w-2xl">
         <Tabs defaultValue="alexander" className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger 
@@ -159,15 +170,15 @@ export default function FitnessSchedule() {
           </TabsList>
           <TabsContent value="alexander" className="mt-6">
             <TrainerSchedule 
-              trainerName="Alexander" 
-              trainerId="trainer1"
+              trainerName={TRAINER_NAMES.ALEXANDER} 
+              trainerId={TRAINER_IDS.ALEXANDER}
               onWorkoutCompleted={refetchStats}
             />
           </TabsContent>
           <TabsContent value="kannika" className="mt-6">
             <TrainerSchedule 
-              trainerName="Kannika" 
-              trainerId="trainer2"
+              trainerName={TRAINER_NAMES.KANNIKA} 
+              trainerId={TRAINER_IDS.KANNIKA}
               onWorkoutCompleted={refetchStats}
             />
           </TabsContent>

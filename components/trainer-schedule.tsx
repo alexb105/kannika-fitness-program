@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useMemo, useCallback } from "react"
 import type { DayPlan } from "@/app/page"
 import { DayCardStack } from "@/components/day-card-stack"
 import { WorkoutModal } from "@/components/workout-modal"
@@ -8,6 +8,8 @@ import { ArchiveModal } from "@/components/archive-modal"
 import { Button } from "@/components/ui/button"
 import { Archive } from "lucide-react"
 import { useTrainerDays } from "@/lib/hooks/use-trainer-days"
+import { useToast } from "@/hooks/use-toast"
+import { TrainerScheduleSkeleton } from "@/components/loading-skeleton"
 
 interface TrainerScheduleProps {
   trainerName: string
@@ -20,24 +22,31 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
     trainerId,
     trainerName,
   })
+  const { toast } = useToast()
   const [selectedDay, setSelectedDay] = useState<DayPlan | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isArchiveOpen, setIsArchiveOpen] = useState(false)
 
-  const handleDayClick = (day: DayPlan) => {
+  const handleDayClick = useCallback((day: DayPlan) => {
     setSelectedDay(day)
     setIsModalOpen(true)
-  }
+  }, [])
 
-  const handleSavePlan = async (updatedDay: DayPlan) => {
+  const handleSavePlan = useCallback(async (updatedDay: DayPlan) => {
     try {
       const wasWorkout = updatedDay.type === "workout"
       const previousDay = days.find((d) => d.id === updatedDay.id)
       const wasCompleted = previousDay?.completed
       const isNowCompleted = updatedDay.completed
       
+      // Optimistic update
       await saveDay(updatedDay)
       setIsModalOpen(false)
+      
+      toast({
+        title: "Day saved",
+        description: `Your ${updatedDay.type === "workout" ? "workout" : "rest day"} has been saved.`,
+      })
       
       // If this is a workout and completion status changed, update stats
       if (wasWorkout && wasCompleted !== isNowCompleted && onWorkoutCompleted) {
@@ -47,18 +56,32 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
       }
     } catch (error) {
       console.error("Error saving day:", error)
+      toast({
+        title: "Error",
+        description: "Failed to save day. Please try again.",
+        variant: "destructive",
+      })
     }
-  }
+  }, [days, saveDay, toast, onWorkoutCompleted])
 
-  const handleAddDay = async () => {
+  const handleAddDay = useCallback(async () => {
     try {
       await addDay()
+      toast({
+        title: "Day added",
+        description: "A new day has been added to your schedule.",
+      })
     } catch (error) {
       console.error("Error adding day:", error)
+      toast({
+        title: "Error",
+        description: "Failed to add day. Please try again.",
+        variant: "destructive",
+      })
     }
-  }
+  }, [addDay, toast])
 
-  const handleToggleComplete = async (dayId: string) => {
+  const handleToggleComplete = useCallback(async (dayId: string) => {
     try {
       const day = days.find((d) => d.id === dayId)
       
@@ -68,31 +91,46 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
       }
       
       const wasWorkout = day.type === "workout"
+      const wasCompleted = day.completed
       
+      // Optimistic update
       await toggleComplete(dayId)
+      
+      toast({
+        title: wasCompleted ? "Workout unmarked" : "Workout completed!",
+        description: wasCompleted 
+          ? "The workout has been unmarked as complete."
+          : "Great job! Keep up the momentum! 💪",
+      })
       
       // If this was a workout day, update the competition stats
       if (wasWorkout && onWorkoutCompleted) {
-        // Small delay to ensure database update is complete
         setTimeout(() => {
           onWorkoutCompleted()
         }, 100)
       }
     } catch (error) {
       console.error("Error toggling completion:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update completion status. Please try again.",
+        variant: "destructive",
+      })
     }
-  }
+  }, [days, toggleComplete, toast, onWorkoutCompleted])
 
-  const completedWorkouts = days.filter(
-    (d) => d.completed && d.type === "workout"
-  ).length
+  const completedWorkouts = useMemo(() => 
+    days.filter((d) => d.completed && d.type === "workout").length,
+    [days]
+  )
+
+  const trainerColor = useMemo(() => 
+    trainerName.toLowerCase() === "kannika" ? "purple" : "blue",
+    [trainerName]
+  )
 
   if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-sm text-muted-foreground">Loading schedule...</p>
-      </div>
-    )
+    return <TrainerScheduleSkeleton />
   }
 
   return (
@@ -120,7 +158,7 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
         onDayClick={handleDayClick} 
         onAddDay={handleAddDay}
         onToggleComplete={handleToggleComplete}
-        trainerColor={trainerName.toLowerCase() === "kannika" ? "purple" : "blue"}
+        trainerColor={trainerColor}
       />
 
       <WorkoutModal

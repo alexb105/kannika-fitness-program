@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import type { DayPlan } from '@/app/page'
+import { MAX_ACTIVE_DAYS } from '@/lib/constants'
 
 interface UseTrainerDaysProps {
   trainerId: string
@@ -14,13 +15,16 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
-  // Fetch trainer ID from database
-  const fetchTrainerId = async () => {
+  // Memoize trainer name to avoid unnecessary re-fetches
+  const normalizedTrainerName = useMemo(() => trainerName.toLowerCase(), [trainerName])
+
+  // Fetch trainer ID from database (memoized)
+  const fetchTrainerId = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('trainers')
         .select('id')
-        .eq('name', trainerName.toLowerCase())
+        .eq('name', normalizedTrainerName)
         .single()
 
       if (error) throw error
@@ -29,7 +33,7 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
       console.error('Error fetching trainer ID:', err)
       return null
     }
-  }
+  }, [normalizedTrainerName])
 
   // Fetch days from Supabase
   const fetchDays = async () => {
@@ -72,11 +76,11 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
           completed: day.completed || false,
         }))
 
-      // If no days exist, create initial 7 days in the database
+      // If no days exist, create initial days in the database
       if (convertedDays.length === 0) {
         const today = new Date()
         const daysToInsert = []
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < MAX_ACTIVE_DAYS; i++) {
           const date = new Date(today)
           date.setDate(today.getDate() + i)
           daysToInsert.push({
@@ -233,8 +237,8 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
         throw new Error('Trainer not found')
       }
 
-      // If we have 7 or more active days, archive the oldest one
-      if (days.length >= 7) {
+      // If we have max active days or more, archive the oldest one
+      if (days.length >= MAX_ACTIVE_DAYS) {
         await archiveOldestDay(dbTrainerId)
       }
 
@@ -292,7 +296,8 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
 
   useEffect(() => {
     fetchDays()
-  }, [trainerId, trainerName])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trainerId, normalizedTrainerName])
 
   return {
     days,

@@ -1,10 +1,12 @@
 "use client"
 
+import { memo, useCallback } from "react"
 import type { DayPlan } from "@/app/page"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { Calendar, Dumbbell, Moon, Clock, StickyNote, Check } from "lucide-react"
+import { isToday, formatDate } from "@/lib/date-utils"
 
 interface DayCardProps {
   day: DayPlan
@@ -14,31 +16,30 @@ interface DayCardProps {
   trainerColor?: "blue" | "purple"
 }
 
-function formatDate(date: Date): string {
-  return date.toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  })
-}
-
-function isToday(date: Date): boolean {
-  const today = new Date()
-  return (
-    date.getDate() === today.getDate() &&
-    date.getMonth() === today.getMonth() &&
-    date.getFullYear() === today.getFullYear()
-  )
-}
-
-export function DayCard({ day, index, onClick, onToggleComplete, trainerColor = "blue" }: DayCardProps) {
+export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComplete, trainerColor = "blue" }: DayCardProps) {
   const today = isToday(day.date)
   const isCompleted = day.completed === true
   const isPurple = trainerColor === "purple"
 
+  const handleToggle = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    onToggleComplete()
+  }, [onToggleComplete])
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault()
+      onClick()
+    }
+  }, [onClick])
+
   return (
     <Card
       onClick={onClick}
+      onKeyDown={handleKeyDown}
+      role="button"
+      tabIndex={0}
+      aria-label={`${today ? "Today" : formatDate(day.date)} - ${day.type === "workout" ? "Workout" : day.type === "rest" ? "Rest Day" : "Tap to plan"}`}
       className={cn(
         "relative cursor-pointer overflow-hidden border-border/50 p-4 transition-all duration-200",
         "hover:scale-[1.02] hover:border-primary/50 hover:shadow-lg",
@@ -111,12 +112,10 @@ export function DayCard({ day, index, onClick, onToggleComplete, trainerColor = 
 
         {day.type !== "empty" && (
           <Button
-            onClick={(e) => {
-              e.stopPropagation()
-              onToggleComplete()
-            }}
+            onClick={handleToggle}
             variant={isCompleted ? "default" : "outline"}
             size="icon-sm"
+            aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
             className={cn(
               "h-8 w-8 rounded-full transition-all",
               isCompleted && (isPurple 
@@ -159,4 +158,4 @@ export function DayCard({ day, index, onClick, onToggleComplete, trainerColor = 
       )}
     </Card>
   )
-}
+})
