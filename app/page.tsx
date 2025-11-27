@@ -63,7 +63,6 @@ export default function FitnessSchedule() {
           <Dumbbell className="h-7 w-7 text-primary-foreground" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-foreground">Fitness Challenge</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Two trainers competing to workout the most</p>
       </header>
 
       {/* Dual Competing Progress Bars */}
