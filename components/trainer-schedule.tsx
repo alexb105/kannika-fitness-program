@@ -128,6 +128,7 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
         onClose={() => setIsModalOpen(false)}
         day={selectedDay}
         onSave={handleSavePlan}
+        trainerId={trainerId}
       />
 
       <ArchiveModal

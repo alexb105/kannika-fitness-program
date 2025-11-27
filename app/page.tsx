@@ -43,6 +43,7 @@ export default function FitnessSchedule() {
 
   const handleLogout = () => {
     localStorage.removeItem("app_authenticated")
+    localStorage.removeItem("app_auth_timestamp")
     window.location.reload()
   }
 

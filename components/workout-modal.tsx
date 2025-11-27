@@ -16,6 +16,7 @@ interface WorkoutModalProps {
   day: DayPlan | null
   onSave: (day: DayPlan) => void
   readOnly?: boolean
+  trainerId?: string
 }
 
 const EXERCISE_SUGGESTIONS = [
@@ -33,12 +34,48 @@ const EXERCISE_SUGGESTIONS = [
 
 const DURATION_PRESETS = [15, 30, 45, 60, 90]
 
-export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false }: WorkoutModalProps) {
+const getCustomExercisesKey = (trainerId: string) => `trainer_exercises_${trainerId}`
+
+const loadCustomExercises = (trainerId?: string): string[] => {
+  if (!trainerId || typeof window === "undefined") return []
+  try {
+    const stored = localStorage.getItem(getCustomExercisesKey(trainerId))
+    return stored ? JSON.parse(stored) : []
+  } catch {
+    return []
+  }
+}
+
+const saveCustomExercise = (trainerId: string | undefined, exercise: string) => {
+  if (!trainerId || typeof window === "undefined") return
+  try {
+    const customExercises = loadCustomExercises(trainerId)
+    const exerciseLower = exercise.trim().toLowerCase()
+    
+    // Check if exercise already exists (case-insensitive)
+    const exists = customExercises.some(
+      (e) => e.toLowerCase() === exerciseLower
+    )
+    
+    if (!exists) {
+      const updated = [...customExercises, exercise.trim()]
+      localStorage.setItem(
+        getCustomExercisesKey(trainerId),
+        JSON.stringify(updated)
+      )
+    }
+  } catch (error) {
+    console.error("Error saving custom exercise:", error)
+  }
+}
+
+export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, trainerId }: WorkoutModalProps) {
   const [type, setType] = useState<"workout" | "rest">("workout")
   const [exercises, setExercises] = useState<string[]>([])
   const [newExercise, setNewExercise] = useState("")
   const [duration, setDuration] = useState<number | undefined>(undefined)
   const [notes, setNotes] = useState("")
+  const [customExercises, setCustomExercises] = useState<string[]>([])
 
   useEffect(() => {
     if (day) {
@@ -49,9 +86,27 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false }:
     }
   }, [day])
 
+  useEffect(() => {
+    // Load custom exercises for this trainer when modal opens
+    if (isOpen && trainerId) {
+      const custom = loadCustomExercises(trainerId)
+      setCustomExercises(custom)
+    }
+  }, [isOpen, trainerId])
+
   const handleAddExercise = () => {
-    if (newExercise.trim() && !exercises.includes(newExercise.trim())) {
-      setExercises([...exercises, newExercise.trim()])
+    const trimmedExercise = newExercise.trim()
+    if (trimmedExercise && !exercises.includes(trimmedExercise)) {
+      setExercises([...exercises, trimmedExercise])
+      
+      // Save to custom exercises for this trainer
+      if (trainerId) {
+        saveCustomExercise(trainerId, trimmedExercise)
+        // Update local state to include in suggestions
+        const custom = loadCustomExercises(trainerId)
+        setCustomExercises(custom)
+      }
+      
       setNewExercise("")
     }
   }
@@ -63,6 +118,13 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false }:
   const handleSuggestionClick = (suggestion: string) => {
     if (!exercises.includes(suggestion)) {
       setExercises([...exercises, suggestion])
+      
+      // Save to custom exercises if it's a custom one (not in default suggestions)
+      if (trainerId && !EXERCISE_SUGGESTIONS.includes(suggestion)) {
+        saveCustomExercise(trainerId, suggestion)
+        const custom = loadCustomExercises(trainerId)
+        setCustomExercises(custom)
+      }
     }
   }
 
@@ -70,6 +132,18 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false }:
     if (day) {
       // Don't allow empty days to be marked as completed
       const shouldBeCompleted = type !== "empty" && day.completed
+      
+      // Save all custom exercises (not in default suggestions) to trainer's custom list
+      if (trainerId && type === "workout" && exercises.length > 0) {
+        exercises.forEach((exercise) => {
+          if (!EXERCISE_SUGGESTIONS.includes(exercise)) {
+            saveCustomExercise(trainerId, exercise)
+          }
+        })
+        // Refresh custom exercises list
+        const custom = loadCustomExercises(trainerId)
+        setCustomExercises(custom)
+      }
       
       onSave({
         ...day,
@@ -213,10 +287,32 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false }:
                 </div>
               )}
 
+              {/* Custom Exercises (Previously Used) */}
+              {customExercises.length > 0 && (
+                <div>
+                  <Label className="text-foreground">Your Previous Exercises</Label>
+                  <div className="mt-2 flex flex-wrap gap-2">
+                    {customExercises
+                      .filter((s) => !exercises.includes(s))
+                      .map((suggestion) => (
+                        <button
+                          key={suggestion}
+                          onClick={() => !readOnly && handleSuggestionClick(suggestion)}
+                          disabled={readOnly}
+                          className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:border-primary/50 hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {suggestion}
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Default Exercise Suggestions */}
               <div>
                 <Label className="text-foreground">Quick Add</Label>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {EXERCISE_SUGGESTIONS.filter((s) => !exercises.includes(s)).map((suggestion) => (
+                  {EXERCISE_SUGGESTIONS.filter((s) => !exercises.includes(s) && !customExercises.includes(s)).map((suggestion) => (
                     <button
                       key={suggestion}
                       onClick={() => !readOnly && handleSuggestionClick(suggestion)}
