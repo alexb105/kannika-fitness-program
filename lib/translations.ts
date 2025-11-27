@@ -69,6 +69,24 @@ export const translations = {
     accessApplication: "Access Application",
     incorrectPassword: "Incorrect password. Please try again.",
     
+    // Weight tracking
+    weightTracking: "Weight Tracking",
+    logWeight: "Log Weight",
+    back: "Back",
+    weight: "Weight",
+    kg: "kg",
+    lastLogged: "Last logged",
+    noWeightEntries: "No weight entries yet",
+    logFirstWeight: "Log your first weight to start tracking",
+    weightProgress: "Weight Progress",
+    recentEntries: "Recent Entries",
+    logWeightDescription: "Log your weight to track your progress over time",
+    date: "Date",
+    optionalNotes: "Optional notes",
+    save: "Save",
+    deleteWeightEntry: "Delete Weight Entry",
+    deleteWeightEntryDescription: "Are you sure you want to delete this weight entry? This action cannot be undone.",
+    
     // Exercise suggestions
     pushUps: "Push-ups",
     squats: "Squats",
@@ -148,6 +166,24 @@ export const translations = {
     rememberMe: "จำฉันไว้ (เข้าสู่ระบบอัตโนมัติ 1 ปี)",
     accessApplication: "เข้าถึงแอปพลิเคชัน",
     incorrectPassword: "รหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง",
+    
+    // Weight tracking
+    weightTracking: "ติดตามน้ำหนัก",
+    logWeight: "บันทึกน้ำหนัก",
+    back: "กลับ",
+    weight: "น้ำหนัก",
+    kg: "กก.",
+    lastLogged: "บันทึกล่าสุด",
+    noWeightEntries: "ยังไม่มีบันทึกน้ำหนัก",
+    logFirstWeight: "บันทึกน้ำหนักครั้งแรกเพื่อเริ่มติดตาม",
+    weightProgress: "ความคืบหน้าน้ำหนัก",
+    recentEntries: "รายการล่าสุด",
+    logWeightDescription: "บันทึกน้ำหนักเพื่อติดตามความคืบหน้า",
+    date: "วันที่",
+    optionalNotes: "หมายเหตุ (ไม่บังคับ)",
+    save: "บันทึก",
+    deleteWeightEntry: "ลบบันทึกน้ำหนัก",
+    deleteWeightEntryDescription: "คุณแน่ใจหรือไม่ว่าต้องการลบบันทึกน้ำหนักนี้? การกระทำนี้ไม่สามารถยกเลิกได้",
     
     // Exercise suggestions
     pushUps: "วิดพื้น",
