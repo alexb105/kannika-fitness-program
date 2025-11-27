@@ -1,6 +1,6 @@
 "use client"
 
-import { useMemo, useCallback } from "react"
+import { useMemo, useCallback, useState, useEffect } from "react"
 import { TrainerSchedule } from "@/components/trainer-schedule"
 import { Dumbbell, LogOut } from "lucide-react"
 import { Card } from "@/components/ui/card"
@@ -11,6 +11,8 @@ import { ProgressBarSkeleton } from "@/components/loading-skeleton"
 import { cn } from "@/lib/utils"
 import { TRAINER_IDS, TRAINER_NAMES, STORAGE_KEYS } from "@/lib/constants"
 
+const ACTIVE_TAB_STORAGE_KEY = "active_trainer_tab"
+
 export interface DayPlan {
   id: string
   date: Date
@@ -19,10 +21,31 @@ export interface DayPlan {
   duration?: number
   notes?: string
   completed?: boolean
+  missed?: boolean
 }
 
 export default function FitnessSchedule() {
   const { alexander, kannika, loading: statsLoading, refetch: refetchStats } = useCompetitionStats()
+  
+  // Load saved tab from localStorage or default to "alexander"
+  const [activeTab, setActiveTab] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem(ACTIVE_TAB_STORAGE_KEY)
+      return saved === "kannika" ? "kannika" : "alexander"
+    }
+    return "alexander"
+  })
+
+  // Save tab to localStorage when it changes
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem(ACTIVE_TAB_STORAGE_KEY, activeTab)
+    }
+  }, [activeTab])
+
+  const handleTabChange = useCallback((value: string) => {
+    setActiveTab(value)
+  }, [])
 
   const winner = useMemo(() => {
     if (alexander > kannika) return "trainer1"
@@ -153,7 +176,7 @@ export default function FitnessSchedule() {
 
       {/* Two Trainer Schedules in Tabs */}
       <div className="mx-auto max-w-2xl">
-        <Tabs defaultValue="alexander" className="w-full">
+        <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger 
               value="alexander"

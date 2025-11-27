@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS days (
   duration INTEGER NULL,
   notes TEXT NULL,
   completed BOOLEAN NULL DEFAULT FALSE,
+  missed BOOLEAN NULL DEFAULT FALSE,
   created_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE NULL DEFAULT NOW(),
   archived BOOLEAN NULL DEFAULT FALSE,
@@ -64,4 +65,42 @@ END $$;
 
 -- Create index on trainer_id and archived for archive queries (after column exists)
 CREATE INDEX IF NOT EXISTS idx_days_trainer_archived ON public.days USING btree (trainer_id, archived);
+
+-- Create index on trainer_id and missed for missed queries
+CREATE INDEX IF NOT EXISTS idx_days_trainer_missed ON public.days USING btree (trainer_id, missed, type);
+
+-- Migration: Add missed column if it doesn't exist (for existing databases)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'days' AND column_name = 'missed'
+  ) THEN
+    ALTER TABLE days ADD COLUMN missed BOOLEAN DEFAULT FALSE;
+  END IF;
+END $$;
+
+-- Enable Row Level Security on tables
+ALTER TABLE trainers ENABLE ROW LEVEL SECURITY;
+ALTER TABLE days ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist (for clean migration)
+DROP POLICY IF EXISTS "Allow all operations on trainers" ON trainers;
+DROP POLICY IF EXISTS "Allow all operations on days" ON days;
+
+-- Policy for trainers table: Allow all operations (since we're using anon key)
+-- In a production app, you'd want more restrictive policies
+CREATE POLICY "Allow all operations on trainers"
+  ON trainers
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+-- Policy for days table: Allow all operations (since we're using anon key)
+-- In a production app, you'd want more restrictive policies based on trainer_id
+CREATE POLICY "Allow all operations on days"
+  ON days
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
 

@@ -5,7 +5,7 @@ import type { DayPlan } from "@/app/page"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Calendar, Dumbbell, Moon, Clock, StickyNote, Check } from "lucide-react"
+import { Calendar, Dumbbell, Moon, Clock, StickyNote, Check, X } from "lucide-react"
 import { isToday, formatDate } from "@/lib/date-utils"
 
 interface DayCardProps {
@@ -13,18 +13,25 @@ interface DayCardProps {
   index: number
   onClick: () => void
   onToggleComplete: () => void
+  onToggleMissed: () => void
   trainerColor?: "blue" | "purple"
 }
 
-export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComplete, trainerColor = "blue" }: DayCardProps) {
+export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComplete, onToggleMissed, trainerColor = "blue" }: DayCardProps) {
   const today = isToday(day.date)
   const isCompleted = day.completed === true
+  const isMissed = day.missed === true
   const isPurple = trainerColor === "purple"
 
-  const handleToggle = useCallback((e: React.MouseEvent) => {
+  const handleToggleComplete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
     onToggleComplete()
   }, [onToggleComplete])
+
+  const handleToggleMissed = useCallback((e: React.MouseEvent) => {
+    e.stopPropagation()
+    onToggleMissed()
+  }, [onToggleMissed])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === "Enter" || e.key === " ") {
@@ -49,6 +56,7 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
         day.type === "workout" && (isPurple ? "bg-purple-500/10 border-purple-500/30" : "bg-primary/10 border-primary/30"),
         day.type === "rest" && "bg-secondary/50 border-secondary",
         isCompleted && "opacity-60 bg-muted/30",
+        isMissed && "opacity-50 bg-destructive/5 border-destructive/30",
       )}
       style={{
         animationDelay: `${index * 50}ms`,
@@ -63,10 +71,13 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               day.type === "rest" && "bg-muted text-muted-foreground",
               day.type === "empty" && "bg-secondary text-secondary-foreground",
               isCompleted && (isPurple ? "bg-purple-600 text-white" : "bg-green-500 text-white"),
+              isMissed && "bg-destructive text-white",
             )}
           >
             {isCompleted ? (
               <Check className="h-5 w-5" />
+            ) : isMissed ? (
+              <X className="h-5 w-5" />
             ) : (
               <>
                 {day.type === "workout" && <Dumbbell className="h-5 w-5" />}
@@ -79,7 +90,8 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
             <p className={cn(
               "font-semibold text-card-foreground", 
               today && (isPurple ? "text-purple-600 dark:text-purple-400" : "text-primary"),
-              isCompleted && "line-through text-muted-foreground"
+              isCompleted && "line-through text-muted-foreground",
+              isMissed && "line-through text-destructive"
             )}>
               {today ? "Today" : formatDate(day.date)}
             </p>
@@ -106,26 +118,46 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
                   <span className={isPurple ? "text-purple-600 dark:text-purple-400" : "text-green-600 dark:text-green-400"}>Completed</span>
                 </>
               )}
+              {isMissed && (
+                <>
+                  <span className="text-border">•</span>
+                  <span className="text-destructive">Missed</span>
+                </>
+              )}
             </div>
           </div>
         </div>
 
         {day.type !== "empty" && (
-          <Button
-            onClick={handleToggle}
-            variant={isCompleted ? "default" : "outline"}
-            size="icon-sm"
-            aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
-            className={cn(
-              "h-8 w-8 rounded-full transition-all",
-              isCompleted && (isPurple 
-                ? "bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
-                : "bg-green-500 hover:bg-green-600 text-white border-green-500"
-              ),
-            )}
-          >
-            <Check className={cn("h-4 w-4", !isCompleted && "opacity-50")} />
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              onClick={handleToggleMissed}
+              variant={isMissed ? "default" : "outline"}
+              size="icon-sm"
+              aria-label={isMissed ? "Unmark as missed" : "Mark as missed"}
+              className={cn(
+                "h-8 w-8 rounded-full transition-all",
+                isMissed && "bg-destructive hover:bg-destructive/90 text-white border-destructive",
+              )}
+            >
+              <X className={cn("h-4 w-4", !isMissed && "opacity-50")} />
+            </Button>
+            <Button
+              onClick={handleToggleComplete}
+              variant={isCompleted ? "default" : "outline"}
+              size="icon-sm"
+              aria-label={isCompleted ? "Mark as incomplete" : "Mark as complete"}
+              className={cn(
+                "h-8 w-8 rounded-full transition-all",
+                isCompleted && (isPurple 
+                  ? "bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
+                  : "bg-green-500 hover:bg-green-600 text-white border-green-500"
+                ),
+              )}
+            >
+              <Check className={cn("h-4 w-4", !isCompleted && "opacity-50")} />
+            </Button>
+          </div>
         )}
       </div>
 

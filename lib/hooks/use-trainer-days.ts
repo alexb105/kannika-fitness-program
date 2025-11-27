@@ -74,6 +74,7 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
           duration: day.duration || undefined,
           notes: day.notes || undefined,
           completed: day.completed || false,
+          missed: day.missed || false,
         }))
 
       // If no days exist, create initial days in the database
@@ -110,6 +111,7 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
             duration: day.duration || undefined,
             notes: day.notes || undefined,
             completed: day.completed || false,
+            missed: day.missed || false,
           }))
 
         setDays(newDays)
@@ -141,7 +143,7 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
       }
 
       // Upsert the day (use date + trainer_id as unique constraint)
-      // Don't allow empty days to be marked as completed
+      // Don't allow empty days to be marked as completed or missed
       const canBeCompleted = day.type !== "empty"
       const dayData: any = {
         trainer_id: dbTrainerId,
@@ -151,6 +153,7 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
         duration: day.duration || null,
         notes: day.notes || null,
         completed: canBeCompleted ? (day.completed || false) : false,
+        missed: canBeCompleted ? (day.missed || false) : false,
         archived: false, // Ensure new/updated days are not archived
       }
 
@@ -170,11 +173,12 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
       if (dayError) throw dayError
 
       // Update local state with the database ID
-      // Ensure empty days are never marked as completed
+      // Ensure empty days are never marked as completed or missed
       const updatedDay: DayPlan = {
         ...day,
         id: upsertedDay.id, // Use the database ID
         completed: day.type === "empty" ? false : (upsertedDay.completed || false),
+        missed: day.type === "empty" ? false : (upsertedDay.missed || false),
       }
 
       setDays((prevDays) => {
@@ -266,6 +270,7 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
         duration: insertedDay.duration || undefined,
         notes: insertedDay.notes || undefined,
         completed: insertedDay.completed || false,
+        missed: insertedDay.missed || false,
       }
 
       setDays((prevDays) => [...prevDays, newDay])
@@ -286,10 +291,39 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
         return
       }
 
-      const updatedDay = { ...day, completed: !day.completed }
+      // If marking as completed, unmark as missed (mutually exclusive)
+      const updatedDay = { 
+        ...day, 
+        completed: !day.completed,
+        missed: !day.completed ? false : day.missed, // Unmark missed if completing
+      }
       await saveDay(updatedDay)
     } catch (err) {
       console.error('Error toggling completion:', err)
+      setError(err as Error)
+    }
+  }
+
+  // Toggle missed status
+  const toggleMissed = async (dayId: string) => {
+    try {
+      const day = days.find((d) => d.id === dayId)
+      if (!day) return
+
+      // Don't allow empty days to be marked as missed
+      if (day.type === "empty") {
+        return
+      }
+
+      // If marking as missed, unmark as completed (mutually exclusive)
+      const updatedDay = { 
+        ...day, 
+        missed: !day.missed,
+        completed: !day.missed ? false : day.completed, // Unmark completed if missing
+      }
+      await saveDay(updatedDay)
+    } catch (err) {
+      console.error('Error toggling missed status:', err)
       setError(err as Error)
     }
   }
@@ -306,6 +340,7 @@ export function useTrainerDays({ trainerId, trainerName }: UseTrainerDaysProps) 
     saveDay,
     addDay,
     toggleComplete,
+    toggleMissed,
     refetch: fetchDays,
   }
 }

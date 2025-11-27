@@ -18,7 +18,7 @@ interface TrainerScheduleProps {
 }
 
 export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: TrainerScheduleProps) {
-  const { days, loading, saveDay, addDay, toggleComplete } = useTrainerDays({
+  const { days, loading, saveDay, addDay, toggleComplete, toggleMissed } = useTrainerDays({
     trainerId,
     trainerName,
   })
@@ -119,6 +119,36 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
     }
   }, [days, toggleComplete, toast, onWorkoutCompleted])
 
+  const handleToggleMissed = useCallback(async (dayId: string) => {
+    try {
+      const day = days.find((d) => d.id === dayId)
+      
+      // Don't allow toggling missed status for empty days
+      if (!day || day.type === "empty") {
+        return
+      }
+      
+      const wasMissed = day.missed
+      
+      // Optimistic update
+      await toggleMissed(dayId)
+      
+      toast({
+        title: wasMissed ? "Session unmarked" : "Session marked as missed",
+        description: wasMissed 
+          ? "The session has been unmarked as missed."
+          : "The session has been marked as missed.",
+      })
+    } catch (error) {
+      console.error("Error toggling missed status:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update missed status. Please try again.",
+        variant: "destructive",
+      })
+    }
+  }, [days, toggleMissed, toast])
+
   const completedWorkouts = useMemo(() => 
     days.filter((d) => d.completed && d.type === "workout").length,
     [days]
@@ -158,6 +188,7 @@ export function TrainerSchedule({ trainerName, trainerId, onWorkoutCompleted }: 
         onDayClick={handleDayClick} 
         onAddDay={handleAddDay}
         onToggleComplete={handleToggleComplete}
+        onToggleMissed={handleToggleMissed}
         trainerColor={trainerColor}
       />
 

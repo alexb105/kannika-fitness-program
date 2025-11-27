@@ -10,10 +10,11 @@ interface DayCardStackProps {
   onDayClick: (day: DayPlan) => void
   onAddDay: () => void
   onToggleComplete: (dayId: string) => void
+  onToggleMissed: (dayId: string) => void
   trainerColor?: "blue" | "purple"
 }
 
-export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, trainerColor }: DayCardStackProps) {
+export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, onToggleMissed, trainerColor }: DayCardStackProps) {
   return (
     <div className="mx-auto w-full">
       <div className="relative flex flex-col gap-3">
@@ -24,6 +25,7 @@ export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, tra
             index={index} 
             onClick={() => onDayClick(day)}
             onToggleComplete={() => onToggleComplete(day.id)}
+            onToggleMissed={() => onToggleMissed(day.id)}
             trainerColor={trainerColor}
           />
         ))}
