@@ -72,7 +72,7 @@ export function WeightTracker({ trainerId, trainerName }: WeightTrackerProps) {
     
     return sorted.map((entry) => ({
       date: formatDate(entry.date),
-      weight: entry.weight,
+      weight: Number(entry.weight), // Ensure weight is a number
       fullDate: entry.date.toISOString().split('T')[0],
     }))
   }, [weightEntries])
@@ -80,9 +80,12 @@ export function WeightTracker({ trainerId, trainerName }: WeightTrackerProps) {
   const chartConfig = {
     weight: {
       label: "Weight",
-      color: "hsl(var(--chart-1))",
+      color: "hsl(221.2 83.2% 53.3%)", // Blue color that will work
     },
   }
+  
+  // Ensure we have at least 2 points to show a line, or show a single point
+  const shouldShowChart = chartData.length > 0
 
   if (loading) {
     return (
@@ -145,27 +148,34 @@ export function WeightTracker({ trainerId, trainerName }: WeightTrackerProps) {
         <Card className="p-6">
           <h4 className="text-sm font-medium mb-4">{t("weightProgress")}</h4>
           <ChartContainer config={chartConfig} className="h-[300px]">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" />
+            <LineChart 
+              data={chartData}
+              margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis 
                 dataKey="date" 
                 tick={{ fontSize: 12 }}
                 angle={-45}
                 textAnchor="end"
                 height={60}
+                stroke="#6b7280"
               />
               <YAxis 
                 tick={{ fontSize: 12 }}
                 domain={['dataMin - 2', 'dataMax + 2']}
+                stroke="#6b7280"
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Line 
                 type="monotone" 
                 dataKey="weight" 
-                stroke="var(--color-weight)" 
-                strokeWidth={2}
-                dot={{ r: 4 }}
-                activeDot={{ r: 6 }}
+                stroke="#3b82f6" 
+                strokeWidth={3}
+                dot={{ r: 5, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
+                activeDot={{ r: 7, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
+                connectNulls={false}
+                isAnimationActive={true}
               />
             </LineChart>
           </ChartContainer>
