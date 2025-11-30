@@ -185,13 +185,13 @@ export default function FitnessSchedule() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger 
               value="alexander"
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
             >
               {t("alexander")}
             </TabsTrigger>
             <TabsTrigger 
               value="kannika"
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 dark:data-[state=active]:text-purple-400"
             >
               {t("kannika")}
             </TabsTrigger>

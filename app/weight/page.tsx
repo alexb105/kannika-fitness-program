@@ -92,13 +92,13 @@ export default function WeightTrackingPage() {
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger
               value={TRAINER_IDS.ALEXANDER}
-              className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+              className="data-[state=active]:border-blue-600 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400"
             >
               {t("alexander")}
             </TabsTrigger>
             <TabsTrigger
               value={TRAINER_IDS.KANNIKA}
-              className="data-[state=active]:bg-purple-600 data-[state=active]:text-white"
+              className="data-[state=active]:border-purple-600 data-[state=active]:text-purple-600 dark:data-[state=active]:text-purple-400"
             >
               {t("kannika")}
             </TabsTrigger>

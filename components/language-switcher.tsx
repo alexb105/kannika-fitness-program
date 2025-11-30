@@ -28,13 +28,13 @@ export function LanguageSwitcher() {
       <DropdownMenuContent align="end">
         <DropdownMenuItem
           onClick={() => setLanguage("en")}
-          className={language === "en" ? "bg-accent" : ""}
+          className={language === "en" ? "border border-primary" : ""}
         >
           English
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setLanguage("th")}
-          className={language === "th" ? "bg-accent" : ""}
+          className={language === "th" ? "border border-primary" : ""}
         >
           ไทย (Thai)
         </DropdownMenuItem>

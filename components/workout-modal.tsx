@@ -186,7 +186,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
               className={cn(
                 "flex flex-1 flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
                 type === "workout"
-                  ? "border-primary bg-primary/10 text-primary"
+                  ? "border-primary text-primary"
                   : "border-border bg-card text-muted-foreground hover:border-primary/50",
                 readOnly && "cursor-default opacity-75",
               )}
@@ -200,7 +200,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
               className={cn(
                 "flex flex-1 flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all",
                 type === "rest"
-                  ? "border-primary bg-primary/10 text-primary"
+                  ? "border-primary text-primary"
                   : "border-border bg-card text-muted-foreground hover:border-primary/50",
                 readOnly && "cursor-default opacity-75",
               )}
@@ -226,7 +226,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
                       className={cn(
                         "rounded-lg border px-3 py-2 text-sm font-medium transition-colors",
                         duration === preset
-                          ? "border-primary bg-primary text-primary-foreground"
+                          ? "border-primary text-primary"
                           : "border-border bg-secondary text-secondary-foreground hover:border-primary/50",
                         readOnly && "opacity-50 cursor-default",
                       )}
@@ -276,13 +276,13 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
                     {exercises.map((exercise) => (
                       <span
                         key={exercise}
-                        className="flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1.5 text-sm font-medium text-primary"
+                        className="flex items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 text-sm font-medium text-primary"
                       >
                         {exercise}
                         {!readOnly && (
                           <button
                             onClick={() => handleRemoveExercise(exercise)}
-                            className="rounded-full p-0.5 hover:bg-primary/30"
+                            className="rounded-full p-0.5 hover:border-primary/50"
                           >
                             <X className="h-3 w-3" />
                           </button>
@@ -305,7 +305,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
                           key={suggestion}
                           onClick={() => !readOnly && handleSuggestionClick(suggestion)}
                           disabled={readOnly}
-                          className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:border-primary/50 hover:bg-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="rounded-full border border-primary/30 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:border-primary/50 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                           {suggestion}
                         </button>
@@ -325,7 +325,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
                         key={suggestion}
                         onClick={() => !readOnly && handleSuggestionClick(suggestion)}
                         disabled={readOnly}
-                        className="rounded-full border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:border-primary/50 hover:bg-primary/10 hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="rounded-full border border-border bg-secondary px-3 py-1.5 text-sm text-secondary-foreground transition-colors hover:border-primary/50 hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {suggestion}
                       </button>
