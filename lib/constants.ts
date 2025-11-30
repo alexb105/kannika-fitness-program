@@ -38,6 +38,3 @@ export const STORAGE_KEYS = {
 // Auth expiry (days)
 export const AUTH_EXPIRY_DAYS = 365
 
-// Maximum active days before archiving
-export const MAX_ACTIVE_DAYS = 7
-

@@ -16,8 +16,8 @@ import { translateExercises } from "@/lib/translations"
 interface ArchiveModalProps {
   isOpen: boolean
   onClose: () => void
-  trainerName: string
-  trainerId: string
+  trainerName?: string
+  trainerId?: string
 }
 
 function formatDate(date: Date): string {
@@ -29,9 +29,9 @@ function formatDate(date: Date): string {
   })
 }
 
-export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: ArchiveModalProps) {
+export function ArchiveModal({ isOpen, onClose }: ArchiveModalProps) {
   const { t, language } = useLanguage()
-  const { archivedDays, loading, fetchArchivedDays, deleteArchivedDay } = useArchivedDays({ trainerName })
+  const { archivedDays, loading, refetch: fetchArchivedDays, deleteArchivedDay } = useArchivedDays()
   const [selectedDay, setSelectedDay] = useState<DayPlan | null>(null)
   const [isViewModalOpen, setIsViewModalOpen] = useState(false)
   const [dayToDelete, setDayToDelete] = useState<DayPlan | null>(null)
@@ -73,7 +73,7 @@ export function ArchiveModal({ isOpen, onClose, trainerName, trainerId }: Archiv
         <DialogHeader>
           <div className="flex items-center gap-2">
             <Archive className="h-5 w-5 text-muted-foreground" />
-            <DialogTitle className="text-foreground">{trainerName}'s {t("archive")}</DialogTitle>
+            <DialogTitle className="text-foreground">{t("archive")}</DialogTitle>
           </div>
           <DialogDescription>
             {t("archive")}

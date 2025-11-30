@@ -9,23 +9,15 @@ import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart"
-import { useTrainerWeight, type WeightEntry } from "@/lib/hooks/use-trainer-weight"
+import { useUserWeight, type WeightEntry } from "@/lib/hooks/use-user-weight"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { Scale, TrendingUp, TrendingDown, Plus, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid } from "recharts"
 import { formatDate } from "@/lib/date-utils"
 
-interface WeightTrackerProps {
-  trainerId: string
-  trainerName: string
-}
-
-export function WeightTracker({ trainerId, trainerName }: WeightTrackerProps) {
-  const { weightEntries, loading, addWeightEntry, deleteWeightEntry, latestWeight, weightChange } = useTrainerWeight({
-    trainerId,
-    trainerName,
-  })
+export function WeightTracker() {
+  const { weightEntries, loading, addWeightEntry, deleteWeightEntry, latestWeight, weightChange } = useUserWeight()
   const { t, language } = useLanguage()
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [weight, setWeight] = useState("")

@@ -1,52 +1,32 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/lib/contexts/auth-context'
 import type { DayPlan } from '@/app/page'
 
-interface UseArchivedDaysProps {
-  trainerName: string
-}
-
-export function useArchivedDays({ trainerName }: UseArchivedDaysProps) {
+export function useArchivedDays() {
+  const { user } = useAuth()
   const [archivedDays, setArchivedDays] = useState<DayPlan[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
-  // Fetch trainer ID from database
-  const fetchTrainerId = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('trainers')
-        .select('id')
-        .eq('name', trainerName.toLowerCase())
-        .single()
-
-      if (error) throw error
-      return data?.id
-    } catch (err) {
-      console.error('Error fetching trainer ID:', err)
-      return null
-    }
-  }
-
   // Fetch archived days from Supabase
-  const fetchArchivedDays = async () => {
+  const fetchArchivedDays = useCallback(async () => {
+    if (!user) {
+      setArchivedDays([])
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       setError(null)
 
-      const dbTrainerId = await fetchTrainerId()
-      if (!dbTrainerId) {
-        setArchivedDays([])
-        setLoading(false)
-        return
-      }
-
       const { data, error } = await supabase
         .from('days')
         .select('*')
-        .eq('trainer_id', dbTrainerId)
+        .eq('user_id', user.id)
         .eq('archived', true)
         .order('date', { ascending: false })
 
@@ -61,6 +41,7 @@ export function useArchivedDays({ trainerName }: UseArchivedDaysProps) {
         duration: day.duration || undefined,
         notes: day.notes || undefined,
         completed: day.completed || false,
+        missed: day.missed || false,
       }))
 
       setArchivedDays(convertedDays)
@@ -70,7 +51,7 @@ export function useArchivedDays({ trainerName }: UseArchivedDaysProps) {
     } finally {
       setLoading(false)
     }
-  }
+  }, [user])
 
   // Delete an archived day
   const deleteArchivedDay = async (dayId: string) => {
@@ -82,8 +63,7 @@ export function useArchivedDays({ trainerName }: UseArchivedDaysProps) {
 
       if (error) throw error
 
-      // Remove from local state
-      setArchivedDays((prevDays) => prevDays.filter((d) => d.id !== dayId))
+      setArchivedDays((prev) => prev.filter((day) => day.id !== dayId))
     } catch (err) {
       console.error('Error deleting archived day:', err)
       setError(err as Error)
@@ -92,15 +72,14 @@ export function useArchivedDays({ trainerName }: UseArchivedDaysProps) {
   }
 
   useEffect(() => {
-    // Don't fetch automatically - only when explicitly called
-  }, [trainerName])
+    fetchArchivedDays()
+  }, [fetchArchivedDays])
 
   return {
     archivedDays,
     loading,
     error,
-    fetchArchivedDays,
+    refetch: fetchArchivedDays,
     deleteArchivedDay,
   }
 }
-

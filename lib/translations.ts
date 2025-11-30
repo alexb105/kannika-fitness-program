@@ -3,7 +3,9 @@ export type Language = "en" | "th"
 export const translations = {
   en: {
     // Header
-    fitnessChallenge: "Fitness Challenge",
+    fitnessChallenge: "Elite Fitness",
+    fitnessSchedule: "Elite Fitness",
+    mySchedule: "My Schedule",
     logout: "Logout",
     
     // Progress bars
@@ -17,6 +19,10 @@ export const translations = {
     completed: "completed",
     addDay: "Add Day",
     viewArchive: "View Archive",
+    loadPreviousWeek: "Load Previous Week",
+    selectDate: "Select a date to view",
+    jumpToToday: "Jump to today",
+    loadMoreDays: "Load More Days",
     
     // Day card
     today: "Today",
@@ -69,6 +75,13 @@ export const translations = {
     accessApplication: "Access Application",
     incorrectPassword: "Incorrect password. Please try again.",
     
+    // Friends workouts
+    friendsTraining: "Friends Training",
+    viewFriendsTraining: "View friends training on this day",
+    noFriendsTraining: "No friends are training on this day",
+    unknownUser: "Unknown User",
+    loading: "Loading",
+    
     // Weight tracking
     weightTracking: "Weight Tracking",
     logWeight: "Log Weight",
@@ -101,7 +114,9 @@ export const translations = {
   },
   th: {
     // Header
-    fitnessChallenge: "ท้าทายฟิตเนส",
+    fitnessChallenge: "Elite Fitness",
+    fitnessSchedule: "Elite Fitness",
+    mySchedule: "ตารางของฉัน",
     logout: "ออกจากระบบ",
     
     // Progress bars
@@ -115,6 +130,10 @@ export const translations = {
     completed: "เสร็จแล้ว",
     addDay: "เพิ่มวัน",
     viewArchive: "ดูที่เก็บถาวร",
+    loadPreviousWeek: "โหลดสัปดาห์ก่อนหน้า",
+    selectDate: "เลือกวันที่เพื่อดู",
+    jumpToToday: "ไปที่วันนี้",
+    loadMoreDays: "โหลดวันเพิ่มเติม",
     
     // Day card
     today: "วันนี้",
@@ -166,6 +185,13 @@ export const translations = {
     rememberMe: "จำฉันไว้ (เข้าสู่ระบบอัตโนมัติ 1 ปี)",
     accessApplication: "เข้าถึงแอปพลิเคชัน",
     incorrectPassword: "รหัสผ่านไม่ถูกต้อง กรุณาลองอีกครั้ง",
+    
+    // Friends workouts
+    friendsTraining: "เพื่อนที่กำลังฝึก",
+    viewFriendsTraining: "ดูเพื่อนที่กำลังฝึกในวันนี้",
+    noFriendsTraining: "ไม่มีเพื่อนที่กำลังฝึกในวันนี้",
+    unknownUser: "ผู้ใช้ไม่ทราบชื่อ",
+    loading: "กำลังโหลด",
     
     // Weight tracking
     weightTracking: "ติดตามน้ำหนัก",

@@ -11,6 +11,7 @@ import { Dumbbell, Moon, Plus, X, Clock } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { DURATION_PRESETS, STORAGE_KEYS } from "@/lib/constants"
 import { useLanguage } from "@/lib/contexts/language-context"
+import { useAuth } from "@/lib/contexts/auth-context"
 import { getExerciseSuggestions } from "@/lib/translations"
 
 interface WorkoutModalProps {
@@ -22,20 +23,20 @@ interface WorkoutModalProps {
   trainerId?: string
 }
 
-const loadCustomExercises = (trainerId?: string): string[] => {
-  if (!trainerId || typeof window === "undefined") return []
+const loadCustomExercises = (userId?: string): string[] => {
+  if (!userId || typeof window === "undefined") return []
   try {
-    const stored = localStorage.getItem(STORAGE_KEYS.CUSTOM_EXERCISES(trainerId))
+    const stored = localStorage.getItem(STORAGE_KEYS.CUSTOM_EXERCISES(userId))
     return stored ? JSON.parse(stored) : []
   } catch {
     return []
   }
 }
 
-const saveCustomExercise = (trainerId: string | undefined, exercise: string) => {
-  if (!trainerId || typeof window === "undefined") return
+const saveCustomExercise = (userId: string | undefined, exercise: string) => {
+  if (!userId || typeof window === "undefined") return
   try {
-    const customExercises = loadCustomExercises(trainerId)
+    const customExercises = loadCustomExercises(userId)
     const exerciseLower = exercise.trim().toLowerCase()
     
     // Check if exercise already exists (case-insensitive)
@@ -46,7 +47,7 @@ const saveCustomExercise = (trainerId: string | undefined, exercise: string) => 
     if (!exists) {
       const updated = [...customExercises, exercise.trim()]
       localStorage.setItem(
-        STORAGE_KEYS.CUSTOM_EXERCISES(trainerId),
+        STORAGE_KEYS.CUSTOM_EXERCISES(userId),
         JSON.stringify(updated)
       )
     }
@@ -55,7 +56,8 @@ const saveCustomExercise = (trainerId: string | undefined, exercise: string) => 
   }
 }
 
-export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, trainerId }: WorkoutModalProps) {
+export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false }: WorkoutModalProps) {
+  const { user } = useAuth()
   const { t, language } = useLanguage()
   const [type, setType] = useState<"workout" | "rest">("workout")
   const [exercises, setExercises] = useState<string[]>([])
@@ -77,29 +79,29 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
   }, [day])
 
   useEffect(() => {
-    // Load custom exercises for this trainer when modal opens
-    if (isOpen && trainerId) {
-      const custom = loadCustomExercises(trainerId)
+    // Load custom exercises for this user when modal opens
+    if (isOpen && user?.id) {
+      const custom = loadCustomExercises(user.id)
       setCustomExercises(custom)
     }
-  }, [isOpen, trainerId])
+  }, [isOpen, user?.id])
 
   const handleAddExercise = useCallback(() => {
     const trimmedExercise = newExercise.trim()
     if (trimmedExercise && !exercises.includes(trimmedExercise)) {
       setExercises((prev) => [...prev, trimmedExercise])
       
-      // Save to custom exercises for this trainer
-      if (trainerId) {
-        saveCustomExercise(trainerId, trimmedExercise)
+      // Save to custom exercises for this user
+      if (user?.id) {
+        saveCustomExercise(user.id, trimmedExercise)
         // Update local state to include in suggestions
-        const custom = loadCustomExercises(trainerId)
+        const custom = loadCustomExercises(user.id)
         setCustomExercises(custom)
       }
       
       setNewExercise("")
     }
-  }, [newExercise, exercises, trainerId])
+  }, [newExercise, exercises, user?.id])
 
   const handleRemoveExercise = useCallback((exercise: string) => {
     setExercises((prev) => prev.filter((e) => e !== exercise))
@@ -110,28 +112,28 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
       setExercises((prev) => [...prev, suggestion])
       
       // Save to custom exercises if it's a custom one (not in default suggestions)
-      if (trainerId && !exerciseSuggestions.includes(suggestion)) {
-        saveCustomExercise(trainerId, suggestion)
-        const custom = loadCustomExercises(trainerId)
+      if (user?.id && !exerciseSuggestions.includes(suggestion)) {
+        saveCustomExercise(user.id, suggestion)
+        const custom = loadCustomExercises(user.id)
         setCustomExercises(custom)
       }
     }
-  }, [exercises, trainerId, exerciseSuggestions])
+  }, [exercises, user?.id, exerciseSuggestions])
 
   const handleSave = useCallback(() => {
     if (day) {
       // Don't allow empty days to be marked as completed
       const shouldBeCompleted = type !== "empty" && day.completed
       
-      // Save all custom exercises (not in default suggestions) to trainer's custom list
-      if (trainerId && type === "workout" && exercises.length > 0) {
+      // Save all custom exercises (not in default suggestions) to user's custom list
+      if (user?.id && type === "workout" && exercises.length > 0) {
         exercises.forEach((exercise) => {
           if (!exerciseSuggestions.includes(exercise)) {
-            saveCustomExercise(trainerId, exercise)
+            saveCustomExercise(user.id, exercise)
           }
         })
         // Refresh custom exercises list
-        const custom = loadCustomExercises(trainerId)
+        const custom = loadCustomExercises(user.id)
         setCustomExercises(custom)
       }
       
@@ -144,7 +146,7 @@ export function WorkoutModal({ isOpen, onClose, day, onSave, readOnly = false, t
         completed: shouldBeCompleted,
       })
     }
-  }, [day, type, exercises, duration, notes, trainerId, onSave])
+  }, [day, type, exercises, duration, notes, user?.id, onSave, exerciseSuggestions])
 
   // Keyboard shortcut: Escape to close
   useEffect(() => {

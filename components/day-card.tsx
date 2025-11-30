@@ -1,14 +1,16 @@
 "use client"
 
-import { memo, useCallback, useMemo } from "react"
+import { memo, useCallback, useMemo, useState, useEffect } from "react"
 import type { DayPlan } from "@/app/page"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
-import { Calendar, Dumbbell, Moon, Clock, StickyNote, Check, X } from "lucide-react"
+import { Calendar, Dumbbell, Moon, Clock, StickyNote, Check, X, Users } from "lucide-react"
 import { isToday, formatDate } from "@/lib/date-utils"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { translateExercises } from "@/lib/translations"
+import { useFriendsWorkouts } from "@/lib/hooks/use-friends-workouts"
+import { FriendsWorkoutModal } from "@/components/friends-workout-modal"
 
 interface DayCardProps {
   day: DayPlan
@@ -25,12 +27,54 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
   const isCompleted = day.completed === true
   const isMissed = day.missed === true
   const isPurple = trainerColor === "purple"
+  const { fetchFriendsWorkoutsForDate, loading: loadingFriendsWorkouts } = useFriendsWorkouts()
+  const [friendWorkouts, setFriendWorkouts] = useState<any[]>([])
+  const [isFriendsModalOpen, setIsFriendsModalOpen] = useState(false)
+  const [hasFriendsWorkouts, setHasFriendsWorkouts] = useState(false)
   
   // Translate exercises for display
   const translatedExercises = useMemo(() => {
     if (!day.exercises || day.exercises.length === 0) return []
     return translateExercises(day.exercises, language)
   }, [day.exercises, language])
+
+  // Check if friends have workouts on this date
+  useEffect(() => {
+    let mounted = true
+    
+    const checkFriendsWorkouts = async () => {
+      try {
+        const workouts = await fetchFriendsWorkoutsForDate(day.date)
+        console.log(`Day card ${formatDate(day.date)}: Found ${workouts.length} friend workouts`, workouts)
+        if (mounted) {
+          setFriendWorkouts(workouts)
+          setHasFriendsWorkouts(workouts.length > 0)
+        }
+      } catch (error) {
+        console.error("Error checking friends workouts:", error)
+        if (mounted) {
+          setHasFriendsWorkouts(false)
+        }
+      }
+    }
+    
+    // Small delay to ensure friends are loaded
+    const timeoutId = setTimeout(() => {
+      checkFriendsWorkouts()
+    }, 500)
+    
+    return () => {
+      mounted = false
+      clearTimeout(timeoutId)
+    }
+  }, [day.date, fetchFriendsWorkoutsForDate])
+
+  const handleFriendsWorkoutClick = useCallback(async (e: React.MouseEvent) => {
+    e.stopPropagation()
+    const workouts = await fetchFriendsWorkoutsForDate(day.date)
+    setFriendWorkouts(workouts)
+    setIsFriendsModalOpen(true)
+  }, [day.date, fetchFriendsWorkoutsForDate])
 
   const handleToggleComplete = useCallback((e: React.MouseEvent) => {
     e.stopPropagation()
@@ -137,8 +181,25 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
           </div>
         </div>
 
-        {day.type !== "empty" && (
           <div className="flex items-center gap-2">
+          {/* Friends workout indicator */}
+          {hasFriendsWorkouts && (
+            <Button
+              onClick={handleFriendsWorkoutClick}
+              variant="outline"
+              size="icon-sm"
+              className="h-8 w-8 rounded-full relative"
+              title={t("viewFriendsTraining")}
+            >
+              <Users className="h-4 w-4" />
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+                {friendWorkouts.length}
+              </span>
+            </Button>
+          )}
+          
+          {day.type !== "empty" && (
+            <>
             <Button
               onClick={handleToggleMissed}
               variant={isMissed ? "default" : "outline"}
@@ -166,8 +227,9 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
             >
               <Check className={cn("h-4 w-4", !isCompleted && "opacity-50")} />
             </Button>
+            </>
+          )}
           </div>
-        )}
       </div>
 
       {day.type === "workout" && translatedExercises && translatedExercises.length > 0 && (
@@ -197,6 +259,14 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
           <p className="line-clamp-2 text-xs text-muted-foreground">{day.notes}</p>
         </div>
       )}
+
+      <FriendsWorkoutModal
+        isOpen={isFriendsModalOpen}
+        onClose={() => setIsFriendsModalOpen(false)}
+        date={day.date}
+        friendWorkouts={friendWorkouts}
+        loading={loadingFriendsWorkouts}
+      />
     </Card>
   )
 })

@@ -13,9 +13,10 @@ interface DayCardStackProps {
   onToggleComplete: (dayId: string) => void
   onToggleMissed: (dayId: string) => void
   trainerColor?: "blue" | "purple"
+  canAddDay?: boolean
 }
 
-export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, onToggleMissed, trainerColor }: DayCardStackProps) {
+export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, onToggleMissed, trainerColor, canAddDay = true }: DayCardStackProps) {
   const { t } = useLanguage()
   
   return (
@@ -32,6 +33,7 @@ export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, onT
             trainerColor={trainerColor}
           />
         ))}
+        {canAddDay && (
         <Button
           onClick={onAddDay}
           variant="outline"
@@ -40,6 +42,7 @@ export function DayCardStack({ days, onDayClick, onAddDay, onToggleComplete, onT
           <Plus className="h-4 w-4" />
           {t("addDay")}
         </Button>
+        )}
       </div>
     </div>
   )

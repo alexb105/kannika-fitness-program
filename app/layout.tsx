@@ -9,10 +9,10 @@ import "./globals.css"
 const _geist = Geist({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
-// <CHANGE> Updated metadata for fitness app
+// <CHANGE> Updated metadata for Elite Fitness app
 export const metadata: Metadata = {
-  title: "Fitness Schedule",
-  description: "Plan your fitness routine with an intuitive mobile-first scheduler",
+  title: "Elite Fitness",
+  description: "Plan your fitness routine with Elite Fitness - an intuitive mobile-first scheduler",
   generator: "v0.app",
   icons: {
     icon: [
