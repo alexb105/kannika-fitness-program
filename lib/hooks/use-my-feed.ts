@@ -434,7 +434,11 @@ export function useMyFeed() {
     const notifs: Activity[] = []
 
     activities.forEach((activity) => {
-      if (activity.activityType === "activity_liked" || activity.activityType === "activity_commented") {
+      if (
+        activity.activityType === "activity_liked" || 
+        activity.activityType === "activity_commented" ||
+        activity.activityType === "comment_liked"
+      ) {
         notifs.push(activity)
       } else {
         posts.push(activity)
