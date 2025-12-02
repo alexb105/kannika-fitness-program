@@ -2,8 +2,11 @@
 
 import { UserSchedule } from "@/components/user-schedule"
 import { Navbar } from "@/components/navbar"
+import { SocialFeed } from "@/components/social-feed"
+import { MyFeed } from "@/components/my-feed"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
-import { Card } from "@/components/ui/card"
+import { useLanguage } from "@/lib/contexts/language-context"
+import { Calendar, Users, User } from "lucide-react"
 
 export interface DayPlan {
   id: string
@@ -17,35 +20,48 @@ export interface DayPlan {
 }
 
 export default function FitnessSchedule() {
+  const { t } = useLanguage()
+
   return (
     <>
       <Navbar />
       <main className="min-h-screen bg-background px-4 py-8 md:px-8">
         {/* Elite Fitness User Schedule and Social Feed */}
         <div className="mx-auto max-w-4xl">
-        <Tabs defaultValue="schedule" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="schedule">My Schedule</TabsTrigger>
-            <TabsTrigger value="social">Social Feed</TabsTrigger>
-          </TabsList>
-          <TabsContent value="schedule" className="mt-0">
-            <div className="max-w-2xl mx-auto">
-              <UserSchedule />
-            </div>
-          </TabsContent>
-          <TabsContent value="social" className="mt-0">
-            <div className="max-w-2xl mx-auto">
-              <Card className="p-6">
-                <div className="text-center py-8">
-                  <h3 className="text-lg font-semibold mb-2">Social Feed</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Coming soon - See what your friends are up to!
-                  </p>
-                </div>
-              </Card>
-            </div>
-          </TabsContent>
-        </Tabs>
+          <Tabs defaultValue="schedule" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="schedule" className="flex items-center gap-1.5">
+                <Calendar className="w-4 h-4" />
+                <span className="hidden sm:inline">{t("mySchedule")}</span>
+                <span className="sm:hidden">{t("mySchedule").split(" ")[0]}</span>
+              </TabsTrigger>
+              <TabsTrigger value="myfeed" className="flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                <span className="hidden sm:inline">{t("myFeed")}</span>
+                <span className="sm:hidden">{t("myFeed").split(" ")[0]}</span>
+              </TabsTrigger>
+              <TabsTrigger value="social" className="flex items-center gap-1.5">
+                <Users className="w-4 h-4" />
+                <span className="hidden sm:inline">{t("socialFeed")}</span>
+                <span className="sm:hidden">{t("socialFeed").split(" ")[0]}</span>
+              </TabsTrigger>
+            </TabsList>
+            <TabsContent value="schedule" className="mt-0">
+              <div className="max-w-2xl mx-auto">
+                <UserSchedule />
+              </div>
+            </TabsContent>
+            <TabsContent value="myfeed" className="mt-0">
+              <div className="max-w-2xl mx-auto">
+                <MyFeed />
+              </div>
+            </TabsContent>
+            <TabsContent value="social" className="mt-0">
+              <div className="max-w-2xl mx-auto">
+                <SocialFeed />
+              </div>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </>
