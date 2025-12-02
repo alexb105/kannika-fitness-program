@@ -89,3 +89,201 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* ============================================
+   iOS & Mobile Optimizations
+   ============================================ */
+
+/* Safe area insets for notched devices */
+:root {
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+}
+
+/* Prevent iOS rubber-band scrolling on body */
+html {
+  overflow: hidden;
+  height: 100%;
+}
+
+body {
+  overflow: auto;
+  height: 100%;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: none;
+  /* Prevent text selection on long press */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Prevent callout on long press */
+  -webkit-touch-callout: none;
+  /* Smooth scrolling */
+  scroll-behavior: smooth;
+}
+
+/* Allow text selection in inputs and textareas */
+input, textarea, [contenteditable="true"] {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+/* Prevent zoom on input focus (iOS) */
+input, select, textarea {
+  font-size: 16px !important;
+}
+
+/* Disable iOS tap highlight */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Smooth momentum scrolling for scrollable containers */
+.overflow-auto,
+.overflow-y-auto,
+.overflow-x-auto,
+.overflow-scroll,
+.overflow-y-scroll,
+.overflow-x-scroll {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Safe area padding utilities */
+.safe-top {
+  padding-top: var(--safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-left {
+  padding-left: var(--safe-area-inset-left);
+}
+
+.safe-right {
+  padding-right: var(--safe-area-inset-right);
+}
+
+.safe-x {
+  padding-left: var(--safe-area-inset-left);
+  padding-right: var(--safe-area-inset-right);
+}
+
+.safe-y {
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+.safe-all {
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+}
+
+/* Touch-friendly tap targets (minimum 44x44px for iOS) */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Prevent pull-to-refresh on iOS PWA */
+@supports (-webkit-touch-callout: none) {
+  body {
+    overscroll-behavior-y: none;
+  }
+}
+
+/* iOS standalone mode detection */
+@media all and (display-mode: standalone) {
+  /* Add extra bottom padding for home indicator */
+  .standalone-bottom-padding {
+    padding-bottom: calc(var(--safe-area-inset-bottom) + 20px);
+  }
+}
+
+/* Improved button/interactive states for touch */
+button, 
+[role="button"],
+a,
+.cursor-pointer {
+  touch-action: manipulation;
+}
+
+/* Active state for touch feedback */
+button:active:not(:disabled),
+[role="button"]:active:not(:disabled),
+.cursor-pointer:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease;
+}
+
+/* Prevent iOS from adding styles to buttons */
+button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Fix for iOS input styling */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="url"],
+input[type="search"],
+textarea {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: var(--radius);
+}
+
+/* Prevent iOS from zooming on double-tap */
+html {
+  touch-action: manipulation;
+}
+
+/* Smooth transitions for better perceived performance */
+.transition-ios {
+  transition: all 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Hide scrollbar but keep functionality (iOS style) */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* iOS-style blur effect for headers/modals */
+.ios-blur {
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
+/* Fix for 100vh issue on iOS Safari */
+.h-screen-ios {
+  height: 100vh;
+  height: 100dvh;
+  height: -webkit-fill-available;
+}
+
+.min-h-screen-ios {
+  min-height: 100vh;
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
+/* Keyboard-aware viewport */
+@supports (height: 100dvh) {
+  .h-screen-ios {
+    height: 100dvh;
+  }
+  .min-h-screen-ios {
+    min-height: 100dvh;
+  }
+}

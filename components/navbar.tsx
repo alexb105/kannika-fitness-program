@@ -33,8 +33,8 @@ export function Navbar() {
   const isWeightPage = pathname === "/weight"
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-8">
+    <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ios-blur safe-top">
+      <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-4 md:px-8 safe-x">
         {/* Left side - Back button (if not on home) and Logo/Title */}
         <div className="flex items-center gap-4">
           {showBackButton && (
@@ -42,10 +42,10 @@ export function Navbar() {
               variant="ghost"
               size="icon"
               onClick={handleBack}
-              className="h-8 w-8"
+              className="h-10 w-10 touch-target"
               aria-label={t("back")}
             >
-              <ArrowLeft className="h-4 w-4" />
+              <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
           <div className="flex items-center gap-3">
@@ -72,10 +72,10 @@ export function Navbar() {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsFriendsOpen(true)}
-                className="h-8 gap-2"
+                className="h-10 w-10 sm:w-auto sm:px-3 gap-2 touch-target"
                 title="Friends"
               >
-                <Users className="h-4 w-4" />
+                <Users className="h-5 w-5" />
                 <span className="hidden sm:inline">Friends</span>
               </Button>
               {/* Weight Tracking Button */}
@@ -84,10 +84,10 @@ export function Navbar() {
                   variant="ghost"
                   size="sm"
                   onClick={handleWeightTracking}
-                  className="h-8 gap-2"
+                  className="h-10 w-10 sm:w-auto sm:px-3 gap-2 touch-target"
                   title={t("weightTracking")}
                 >
-                  <Scale className="h-4 w-4" />
+                  <Scale className="h-5 w-5" />
                   <span className="hidden sm:inline">{t("weightTracking")}</span>
                 </Button>
               )}

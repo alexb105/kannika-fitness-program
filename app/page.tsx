@@ -23,24 +23,24 @@ export default function FitnessSchedule() {
   const { t } = useLanguage()
 
   return (
-    <>
+    <div className="min-h-screen-ios flex flex-col bg-background">
       <Navbar />
-      <main className="min-h-screen bg-background px-4 py-8 md:px-8">
+      <main className="flex-1 overflow-y-auto overscroll-contain px-4 py-6 md:px-8 safe-bottom">
         {/* Elite Fitness User Schedule and Social Feed */}
-        <div className="mx-auto max-w-4xl">
+        <div className="mx-auto max-w-4xl safe-x">
           <Tabs defaultValue="schedule" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-6">
-              <TabsTrigger value="schedule" className="flex items-center gap-1.5">
+            <TabsList className="grid w-full grid-cols-3 mb-6 h-12">
+              <TabsTrigger value="schedule" className="flex items-center gap-1.5 touch-target text-sm">
                 <Calendar className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("mySchedule")}</span>
                 <span className="sm:hidden">{t("mySchedule").split(" ")[0]}</span>
               </TabsTrigger>
-              <TabsTrigger value="myfeed" className="flex items-center gap-1.5">
+              <TabsTrigger value="myfeed" className="flex items-center gap-1.5 touch-target text-sm">
                 <User className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("myFeed")}</span>
                 <span className="sm:hidden">{t("myFeed").split(" ")[0]}</span>
               </TabsTrigger>
-              <TabsTrigger value="social" className="flex items-center gap-1.5">
+              <TabsTrigger value="social" className="flex items-center gap-1.5 touch-target text-sm">
                 <Users className="w-4 h-4" />
                 <span className="hidden sm:inline">{t("socialFeed")}</span>
                 <span className="sm:hidden">{t("socialFeed").split(" ")[0]}</span>
@@ -64,6 +64,6 @@ export default function FitnessSchedule() {
           </Tabs>
         </div>
       </main>
-    </>
+    </div>
   )
 }
