@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS weight_entries (
 CREATE TABLE IF NOT EXISTS profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
   username TEXT UNIQUE,
+  avatar_url TEXT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   CONSTRAINT username_length_check CHECK (char_length(username) >= 3 AND char_length(username) <= 20),

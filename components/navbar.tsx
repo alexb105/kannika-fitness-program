@@ -2,10 +2,11 @@
 
 import { useCallback, useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { Dumbbell, LogOut, ArrowLeft, Scale, Users } from "lucide-react"
+import { Dumbbell, ArrowLeft, Scale, Users } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { NotificationBell } from "@/components/notification-bell"
+import { ProfileMenu } from "@/components/profile-menu"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { FriendsList } from "@/components/friends-list"
 import { useLanguage } from "@/lib/contexts/language-context"
@@ -14,16 +15,11 @@ import { useUserProfile } from "@/lib/hooks/use-user-profile"
 
 export function Navbar() {
   const { t } = useLanguage()
-  const { user, signOut } = useAuth()
+  const { user } = useAuth()
   const { username } = useUserProfile()
   const router = useRouter()
   const pathname = usePathname()
   const [isFriendsOpen, setIsFriendsOpen] = useState(false)
-
-  const handleLogout = useCallback(async () => {
-    await signOut()
-    router.push("/login")
-  }, [signOut, router])
 
   const handleBack = useCallback(() => {
     router.push("/")
@@ -97,15 +93,7 @@ export function Navbar() {
               )}
               <LanguageSwitcher />
               <NotificationBell />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleLogout}
-                title={t("logout")}
-                className="h-8 w-8"
-              >
-                <LogOut className="h-4 w-4" />
-              </Button>
+              <ProfileMenu />
             </>
           )}
         </div>
