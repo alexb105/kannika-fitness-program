@@ -250,9 +250,27 @@ export function MyFeedItem({ activity, isNotification = false, onToggleCommentLi
 
           {/* Weight value */}
           {activity.activityType === "weight_logged" && activity.metadata.weight && (
-            <p className="text-sm font-semibold mt-1 text-amber-600 dark:text-amber-400">
-              {activity.metadata.weight} {t("kg")}
-            </p>
+            <div className="mt-1">
+              <p className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                {activity.metadata.weight} {t("kg")}
+              </p>
+              {activity.metadata.previous_weight && (
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  {language === "en" ? "Previous:" : "ก่อนหน้า:"} {activity.metadata.previous_weight} {t("kg")}
+                  {activity.metadata.weight_change !== null && activity.metadata.weight_change !== undefined && (
+                    <span className={`font-medium ${
+                      activity.metadata.weight_change < 0 
+                        ? "text-green-500" 
+                        : activity.metadata.weight_change > 0 
+                          ? "text-red-500" 
+                          : "text-muted-foreground"
+                    }`}>
+                      ({activity.metadata.weight_change > 0 ? "+" : ""}{activity.metadata.weight_change.toFixed(1)} {t("kg")})
+                    </span>
+                  )}
+                </p>
+              )}
+            </div>
           )}
 
           {/* Engagement stats for my posts */}

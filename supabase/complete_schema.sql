@@ -478,7 +478,18 @@ RETURNS TRIGGER
 SECURITY DEFINER
 SET search_path = public
 AS $$
+DECLARE
+  previous_weight DECIMAL(5, 2);
+  previous_date DATE;
 BEGIN
+  -- Get the most recent previous weight entry for this user
+  SELECT weight, date INTO previous_weight, previous_date
+  FROM weight_entries
+  WHERE user_id = NEW.user_id
+    AND date < NEW.date
+  ORDER BY date DESC
+  LIMIT 1;
+
   INSERT INTO activities (user_id, activity_type, reference_id, reference_date, metadata)
   VALUES (
     NEW.user_id,
@@ -487,6 +498,9 @@ BEGIN
     NEW.date,
     jsonb_build_object(
       'weight', NEW.weight,
+      'previous_weight', previous_weight,
+      'previous_date', previous_date,
+      'weight_change', CASE WHEN previous_weight IS NOT NULL THEN NEW.weight - previous_weight ELSE NULL END,
       'notes', NEW.notes
     )
   );

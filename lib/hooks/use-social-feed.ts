@@ -54,6 +54,9 @@ export interface Activity {
     duration?: number
     notes?: string
     weight?: number
+    previous_weight?: number
+    previous_date?: string
+    weight_change?: number
     // For notification activities
     liker_id?: string
     liker_username?: string
