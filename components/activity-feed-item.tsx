@@ -19,6 +19,7 @@ import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { translateExercises } from "@/lib/translations"
 import type { Activity, ActivityType } from "@/lib/hooks/use-social-feed"
@@ -254,9 +255,18 @@ export function ActivityFeedItem({
   return (
     <Card className="p-4 hover:bg-muted/30 transition-colors">
       <div className="flex gap-3">
-        {/* Activity Icon */}
-        <div className={`flex-shrink-0 w-10 h-10 rounded-full ${config.bgClass} flex items-center justify-center`}>
-          <Icon className={`w-5 h-5 ${config.colorClass}`} />
+        {/* User Avatar */}
+        <div className="flex-shrink-0 relative">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={activity.avatarUrl || undefined} alt={activity.username || "User"} />
+            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+              {activity.username?.slice(0, 2).toUpperCase() || "U"}
+            </AvatarFallback>
+          </Avatar>
+          {/* Activity type indicator */}
+          <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${config.bgClass} flex items-center justify-center border-2 border-background`}>
+            <Icon className={`w-3 h-3 ${config.colorClass}`} />
+          </div>
         </div>
 
         {/* Content */}

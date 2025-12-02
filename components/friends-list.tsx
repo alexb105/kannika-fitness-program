@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { useFriends, type Friend } from "@/lib/hooks/use-friends"
 import { useFriendRequests } from "@/lib/hooks/use-friend-requests"
@@ -81,9 +82,12 @@ export function FriendsList() {
               className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
             >
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10">
-                  <Users className="h-5 w-5 text-primary" />
-                </div>
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={friend.avatar_url || undefined} alt={friend.username || "Friend"} />
+                  <AvatarFallback className="bg-primary/10 text-primary">
+                    {friend.username?.slice(0, 2).toUpperCase() || "U"}
+                  </AvatarFallback>
+                </Avatar>
                 <div>
                   <p className="font-medium">
                     {friend.username || "Unknown User"}

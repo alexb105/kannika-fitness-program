@@ -65,19 +65,21 @@ export function useMyFeed() {
             .in("activity_id", activityIds)
 
           if (likesData) {
-            // Get usernames for likers
+            // Get usernames and avatars for likers
             const likerIds = [...new Set(likesData.map((l) => l.user_id))]
             let likerUsernamesMap: Record<string, string | null> = {}
+            let likerAvatarsMap: Record<string, string | null> = {}
             
             if (likerIds.length > 0) {
               const { data: likerProfiles } = await supabase
                 .from("profiles")
-                .select("id, username")
+                .select("id, username, avatar_url")
                 .in("id", likerIds)
               
               if (likerProfiles) {
                 likerProfiles.forEach((p) => {
                   likerUsernamesMap[p.id] = p.username
+                  likerAvatarsMap[p.id] = p.avatar_url
                 })
               }
             }
@@ -90,6 +92,7 @@ export function useMyFeed() {
                 id: like.id,
                 userId: like.user_id,
                 username: likerUsernamesMap[like.user_id] || null,
+                avatarUrl: likerAvatarsMap[like.user_id] || null,
                 createdAt: new Date(like.created_at),
               })
               if (like.user_id === user.id) {
@@ -110,19 +113,21 @@ export function useMyFeed() {
             .in("activity_id", activityIds)
 
           if (commentsData && commentsData.length > 0) {
-            // Get usernames for commenters
+            // Get usernames and avatars for commenters
             const commenterIds = [...new Set(commentsData.map((c) => c.user_id))]
             let commenterUsernamesMap: Record<string, string | null> = {}
+            let commenterAvatarsMap: Record<string, string | null> = {}
             
             if (commenterIds.length > 0) {
               const { data: commenterProfiles } = await supabase
                 .from("profiles")
-                .select("id, username")
+                .select("id, username, avatar_url")
                 .in("id", commenterIds)
               
               if (commenterProfiles) {
                 commenterProfiles.forEach((p) => {
                   commenterUsernamesMap[p.id] = p.username
+                  commenterAvatarsMap[p.id] = p.avatar_url
                 })
               }
             }
@@ -138,19 +143,21 @@ export function useMyFeed() {
               .in("comment_id", commentIds)
 
             if (commentLikesData) {
-              // Get usernames for comment likers
+              // Get usernames and avatars for comment likers
               const commentLikerIds = [...new Set(commentLikesData.map((l) => l.user_id))]
               let commentLikerUsernamesMap: Record<string, string | null> = {}
+              let commentLikerAvatarsMap: Record<string, string | null> = {}
 
               if (commentLikerIds.length > 0) {
                 const { data: likerProfiles } = await supabase
                   .from("profiles")
-                  .select("id, username")
+                  .select("id, username, avatar_url")
                   .in("id", commentLikerIds)
 
                 if (likerProfiles) {
                   likerProfiles.forEach((p) => {
                     commentLikerUsernamesMap[p.id] = p.username
+                    commentLikerAvatarsMap[p.id] = p.avatar_url
                   })
                 }
               }
@@ -163,6 +170,7 @@ export function useMyFeed() {
                   id: like.id,
                   userId: like.user_id,
                   username: commentLikerUsernamesMap[like.user_id] || null,
+                  avatarUrl: commentLikerAvatarsMap[like.user_id] || null,
                   createdAt: new Date(like.created_at),
                 })
                 if (like.user_id === user.id) {
@@ -176,6 +184,7 @@ export function useMyFeed() {
                 id: comment.id,
                 userId: comment.user_id,
                 username: commenterUsernamesMap[comment.user_id] || null,
+                avatarUrl: commenterAvatarsMap[comment.user_id] || null,
                 comment: comment.comment,
                 createdAt: new Date(comment.created_at),
                 likes: commentLikesMap[comment.id] || [],
@@ -194,14 +203,15 @@ export function useMyFeed() {
           }
         }
 
-        // Get user's username
+        // Get user's profile (username and avatar)
         const { data: profile } = await supabase
           .from("profiles")
-          .select("username")
+          .select("username, avatar_url")
           .eq("id", user.id)
           .single()
 
         const myUsername = profile?.username || null
+        const myAvatarUrl = profile?.avatar_url || null
 
         // Convert to Activity format
         const convertedActivities: Activity[] = activitiesData.map(
@@ -209,6 +219,7 @@ export function useMyFeed() {
             id: activity.id,
             userId: activity.user_id,
             username: myUsername,
+            avatarUrl: myAvatarUrl,
             activityType: activity.activity_type as ActivityType,
             referenceId: activity.reference_id,
             referenceDate: activity.reference_date

@@ -8,6 +8,7 @@ import { useFriends } from "./use-friends"
 export interface FriendWorkout {
   friend_id: string
   username: string | null
+  avatar_url: string | null
   date: string
   type: "workout" | "rest" | "empty"
   exercises?: string[]
@@ -62,17 +63,20 @@ export function useFriendsWorkouts() {
           throw fetchError
         }
 
-        // Create a map of friend_id to username
+        // Create maps for friend_id to username and avatar
         const usernameMap: Record<string, string | null> = {}
+        const avatarMap: Record<string, string | null> = {}
         friends.forEach((friend) => {
           usernameMap[friend.friend_id] = friend.username
+          avatarMap[friend.friend_id] = friend.avatar_url
         })
 
-        // Map the data to include usernames
+        // Map the data to include usernames and avatars
         const friendWorkouts: FriendWorkout[] = (daysData || [])
           .map((day) => ({
             friend_id: day.user_id,
             username: usernameMap[day.user_id] || null,
+            avatar_url: avatarMap[day.user_id] || null,
             date: day.date,
             type: day.type as "workout" | "rest" | "empty",
             exercises: day.exercises || [],

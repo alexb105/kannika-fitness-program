@@ -9,6 +9,7 @@ export interface Friend {
   id: string
   friend_id: string
   username: string | null
+  avatar_url: string | null
   email: string
   created_at: string
 }
@@ -40,28 +41,32 @@ export function useFriends() {
 
       if (fetchError) throw fetchError
 
-      // Fetch usernames for friends
+      // Fetch profiles for friends (username and avatar)
       const friendIds = (friendsData || []).map((f) => f.friend_id)
-      let profilesMap: Record<string, string | null> = {}
+      let profilesMap: Record<string, { username: string | null; avatar_url: string | null }> = {}
 
       if (friendIds.length > 0) {
         const { data: profiles } = await supabase
           .from("profiles")
-          .select("id, username")
+          .select("id, username, avatar_url")
           .in("id", friendIds)
 
         if (profiles) {
           profiles.forEach((profile) => {
-            profilesMap[profile.id] = profile.username
+            profilesMap[profile.id] = {
+              username: profile.username,
+              avatar_url: profile.avatar_url,
+            }
           })
         }
       }
 
-      // Map friends with usernames
+      // Map friends with profile data
       const friendsList: Friend[] = (friendsData || []).map((friend) => ({
         id: friend.id,
         friend_id: friend.friend_id,
-        username: profilesMap[friend.friend_id] || null,
+        username: profilesMap[friend.friend_id]?.username || null,
+        avatar_url: profilesMap[friend.friend_id]?.avatar_url || null,
         email: "", // Email not needed for now
         created_at: friend.created_at,
       }))

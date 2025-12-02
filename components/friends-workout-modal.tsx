@@ -2,6 +2,7 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Card } from "@/components/ui/card"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Check, X, Clock, Users, Dumbbell } from "lucide-react"
 import { useLanguage } from "@/lib/contexts/language-context"
 import { formatDate } from "@/lib/date-utils"
@@ -64,9 +65,12 @@ export function FriendsWorkoutModal({
                   )}
                 >
                   <div className="flex items-center gap-2 mb-2">
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 shrink-0">
-                      <Dumbbell className="h-3.5 w-3.5 text-primary" />
-                    </div>
+                    <Avatar className="h-7 w-7 shrink-0">
+                      <AvatarImage src={workout.avatar_url || undefined} alt={workout.username || "Friend"} />
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                        {workout.username?.slice(0, 2).toUpperCase() || "U"}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="font-medium text-sm truncate">
