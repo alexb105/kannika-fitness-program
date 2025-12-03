@@ -257,7 +257,7 @@ export function MyFeedItem({ activity, isNotification = false, onToggleCommentLi
               {activity.metadata.previous_weight && (
                 <p className="text-xs text-muted-foreground flex items-center gap-1">
                   {language === "en" ? "Previous:" : "ก่อนหน้า:"} {activity.metadata.previous_weight} {t("kg")}
-                  {activity.metadata.weight_change !== null && activity.metadata.weight_change !== undefined && (
+                  {typeof activity.metadata.weight_change === "number" && (
                     <span className={`font-medium ${
                       activity.metadata.weight_change < 0 
                         ? "text-green-500" 
@@ -265,7 +265,7 @@ export function MyFeedItem({ activity, isNotification = false, onToggleCommentLi
                           ? "text-red-500" 
                           : "text-muted-foreground"
                     }`}>
-                      ({activity.metadata.weight_change > 0 ? "+" : ""}{activity.metadata.weight_change.toFixed(1)} {t("kg")})
+                      ({activity.metadata.weight_change > 0 ? "+" : ""}{Number(activity.metadata.weight_change).toFixed(1)} {t("kg")})
                     </span>
                   )}
                 </p>
