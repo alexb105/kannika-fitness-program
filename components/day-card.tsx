@@ -101,11 +101,12 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
       tabIndex={0}
       aria-label={`${today ? t("today") : formatDate(day.date)} - ${day.type === "workout" ? t("workout") : day.type === "rest" ? t("restDay") : t("tapToPlan")}`}
       className={cn(
-        "relative cursor-pointer overflow-hidden border-border/50 p-4 transition-all duration-200",
-        "hover:scale-[1.02] hover:border-primary/50 hover:shadow-lg",
+        "relative cursor-pointer overflow-hidden border-border/50 p-3 sm:p-4 transition-all duration-200",
+        "hover:border-primary/50 hover:shadow-lg",
+        "sm:hover:scale-[1.02]",
         isPurple ? "hover:shadow-purple-500/10" : "hover:shadow-primary/10",
-        "active:scale-[0.98]",
-        today && (isPurple ? "border-purple-500/50 ring-1 ring-purple-500/30" : "border-primary/50 ring-1 ring-primary/30"),
+        "active:scale-[0.98] active:bg-accent/50",
+        today && (isPurple ? "border-purple-500/50 ring-2 ring-purple-500/30" : "border-primary/50 ring-2 ring-primary/30"),
         day.type === "workout" && (isPurple ? "bg-purple-500/10 border-purple-500/30" : "bg-primary/10 border-primary/30"),
         day.type === "rest" && "bg-secondary/50 border-secondary",
         isCompleted && "opacity-60 bg-muted/30",
@@ -115,11 +116,11 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
         animationDelay: `${index * 50}ms`,
       }}
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
+      <div className="flex items-start sm:items-center justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           <div
             className={cn(
-              "flex h-10 w-10 items-center justify-center rounded-xl",
+              "flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-xl shrink-0",
               day.type === "workout" && (isPurple ? "bg-purple-600 text-white" : "bg-primary text-primary-foreground"),
               day.type === "rest" && "bg-muted text-muted-foreground",
               day.type === "empty" && "bg-secondary text-secondary-foreground",
@@ -139,22 +140,22 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               </>
             )}
           </div>
-          <div>
+          <div className="min-w-0 flex-1">
             <p className={cn(
-              "font-semibold text-card-foreground", 
+              "font-semibold text-card-foreground text-sm sm:text-base truncate", 
               today && (isPurple ? "text-purple-600 dark:text-purple-400" : "text-primary"),
               isCompleted && "line-through text-muted-foreground",
               isMissed && "line-through text-destructive"
             )}>
               {today ? t("today") : formatDate(day.date)}
             </p>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-1 sm:gap-2 text-xs sm:text-sm text-muted-foreground">
               {day.type === "workout" && (
                 <>
                   <span>{day.exercises?.length || 0} {t("exercises")}</span>
                   {day.duration && (
                     <>
-                      <span className="text-border">•</span>
+                      <span className="text-border hidden sm:inline">•</span>
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
                         {day.duration} {t("min")}
@@ -168,31 +169,31 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               {isCompleted && (
                 <>
                   <span className="text-border">•</span>
-                  <span className={isPurple ? "text-purple-600 dark:text-purple-400" : "text-green-600 dark:text-green-400"}>{t("completedLabel")}</span>
+                  <span className={cn("text-xs", isPurple ? "text-purple-600 dark:text-purple-400" : "text-green-600 dark:text-green-400")}>{t("completedLabel")}</span>
                 </>
               )}
               {isMissed && (
                 <>
                   <span className="text-border">•</span>
-                  <span className="text-destructive">{t("missedLabel")}</span>
+                  <span className="text-destructive text-xs">{t("missedLabel")}</span>
                 </>
               )}
             </div>
           </div>
         </div>
 
-          <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
           {/* Friends workout indicator */}
           {hasFriendsWorkouts && (
             <Button
               onClick={handleFriendsWorkoutClick}
               variant="outline"
               size="icon-sm"
-              className="h-8 w-8 rounded-full relative"
+              className="h-9 w-9 sm:h-10 sm:w-10 rounded-full relative touch-target"
               title={t("viewFriendsTraining")}
             >
               <Users className="h-4 w-4" />
-              <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
+              <span className="absolute -top-1 -right-1 flex h-4 w-4 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {friendWorkouts.length}
               </span>
             </Button>
@@ -206,11 +207,11 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               size="icon-sm"
               aria-label={isMissed ? t("sessionUnmarked") : t("sessionMarkedMissed")}
               className={cn(
-                "h-8 w-8 rounded-full transition-all",
+                "h-9 w-9 sm:h-10 sm:w-10 rounded-full transition-all touch-target",
                 isMissed && "bg-destructive hover:bg-destructive/90 text-white border-destructive",
               )}
             >
-              <X className={cn("h-4 w-4", !isMissed && "opacity-50")} />
+              <X className={cn("h-4 w-4 sm:h-5 sm:w-5", !isMissed && "opacity-50")} />
             </Button>
             <Button
               onClick={handleToggleComplete}
@@ -218,27 +219,27 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
               size="icon-sm"
               aria-label={isCompleted ? t("workoutUnmarked") : t("workoutCompleted")}
               className={cn(
-                "h-8 w-8 rounded-full transition-all",
+                "h-9 w-9 sm:h-10 sm:w-10 rounded-full transition-all touch-target",
                 isCompleted && (isPurple 
                   ? "bg-purple-600 hover:bg-purple-700 text-white border-purple-600"
                   : "bg-green-500 hover:bg-green-600 text-white border-green-500"
                 ),
               )}
             >
-              <Check className={cn("h-4 w-4", !isCompleted && "opacity-50")} />
+              <Check className={cn("h-4 w-4 sm:h-5 sm:w-5", !isCompleted && "opacity-50")} />
             </Button>
             </>
           )}
-          </div>
+        </div>
       </div>
 
       {day.type === "workout" && translatedExercises && translatedExercises.length > 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-2 sm:mt-3 flex flex-wrap gap-1.5 sm:gap-2">
           {translatedExercises.slice(0, 3).map((exercise, i) => (
             <span 
               key={i} 
               className={cn(
-                "rounded-full px-2.5 py-1 text-xs font-medium",
+                "rounded-full px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-medium",
                 isPurple ? "bg-purple-500/20 text-purple-600 dark:text-purple-400" : "bg-primary/20 text-primary"
               )}
             >
@@ -246,17 +247,17 @@ export const DayCard = memo(function DayCard({ day, index, onClick, onToggleComp
             </span>
           ))}
           {translatedExercises.length > 3 && (
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-xs font-medium text-muted-foreground">
-              +{translatedExercises.length - 3} more
+            <span className="rounded-full bg-secondary px-2 sm:px-2.5 py-0.5 sm:py-1 text-[11px] sm:text-xs font-medium text-muted-foreground">
+              +{translatedExercises.length - 3}
             </span>
           )}
         </div>
       )}
 
       {day.notes && (
-        <div className="mt-3 flex items-start gap-2 rounded-lg bg-secondary/50 p-2">
+        <div className="mt-2 sm:mt-3 flex items-start gap-2 rounded-lg bg-secondary/50 p-2">
           <StickyNote className="mt-0.5 h-3 w-3 shrink-0 text-muted-foreground" />
-          <p className="line-clamp-2 text-xs text-muted-foreground">{day.notes}</p>
+          <p className="line-clamp-2 text-[11px] sm:text-xs text-muted-foreground">{day.notes}</p>
         </div>
       )}
 

@@ -139,14 +139,15 @@ export function UserSchedule() {
 
   return (
     <div className="flex flex-col">
-      <div className="mb-4 text-center">
-        <h2 className="text-xl font-bold text-foreground mb-2">{t("mySchedule")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground mb-3">
+      {/* Header - Compact on mobile */}
+      <div className="mb-3 sm:mb-4 text-center">
+        <h2 className="text-lg sm:text-xl font-bold text-foreground mb-1 sm:mb-2">{t("mySchedule")}</h2>
+        <p className="text-xs sm:text-sm text-muted-foreground mb-2 sm:mb-3">
           {completedWorkouts} {completedWorkouts !== 1 ? t("workoutsPlural") : t("workouts")} {t("completed")}
         </p>
         
-        {/* Date Picker */}
-        <div className="mb-3 flex gap-2 items-center justify-center">
+        {/* Date Picker - Full width on mobile */}
+        <div className="mb-2 sm:mb-3 flex flex-col sm:flex-row gap-2 items-stretch sm:items-center sm:justify-center">
           <DatePicker
             selectedDate={selectedDate || undefined}
             onSelect={(date) => {
@@ -155,7 +156,7 @@ export function UserSchedule() {
               }
             }}
             placeholder={t("selectDate")}
-            className="flex-1 max-w-xs"
+            className="w-full sm:flex-1 sm:max-w-xs"
             availableDates={allDatesWithData}
             modifiers={{
               hasWorkout: days.filter(d => d.type === 'workout').map(d => d.date),
@@ -164,32 +165,35 @@ export function UserSchedule() {
           />
           <Button
             variant="outline"
-            size="sm"
+            size="default"
             onClick={() => {
               const today = new Date()
               handleJumpToDate(today)
             }}
             title={t("jumpToToday")}
+            className="w-full sm:w-auto touch-target"
           >
             {t("today")}
           </Button>
         </div>
       </div>
 
-      <div className="mb-4 flex flex-col gap-2">
-        {hasMoreWeeks && (
+      {/* Load Previous Week Button */}
+      {hasMoreWeeks && (
+        <div className="mb-3 sm:mb-4">
           <Button
             variant="outline"
-            size="sm"
+            size="default"
             onClick={loadPreviousWeek}
-            className="w-full"
+            className="w-full touch-target"
           >
             <ChevronUp className="h-4 w-4 mr-2" />
             {t("loadPreviousWeek")}
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
+      {/* Day Cards */}
       <DayCardStack 
         days={days} 
         onDayClick={handleDayClick} 
@@ -200,12 +204,13 @@ export function UserSchedule() {
         canAddDay={canAddDay}
       />
 
+      {/* Load More Days Button */}
       {hasMoreDays && (
         <Button
           variant="outline"
-          size="sm"
+          size="default"
           onClick={loadMoreDays}
-          className="mt-4 w-full"
+          className="mt-3 sm:mt-4 w-full touch-target"
         >
           {t("loadMoreDays")}
         </Button>

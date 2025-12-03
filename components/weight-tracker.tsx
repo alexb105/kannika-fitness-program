@@ -88,33 +88,35 @@ export function WeightTracker() {
   }
 
   return (
-    <div className="space-y-4">
-      <Card className="p-6">
-        <div className="flex items-center justify-between mb-4">
+    <div className="space-y-3 sm:space-y-4">
+      {/* Current Weight Card */}
+      <Card className="p-4 sm:p-6">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
           <div className="flex items-center gap-2">
-            <Scale className="h-5 w-5 text-muted-foreground" />
-            <h3 className="text-lg font-semibold">{t("weightTracking")}</h3>
+            <Scale className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+            <h3 className="text-base sm:text-lg font-semibold">{t("weightTracking")}</h3>
           </div>
-          <Button onClick={() => setIsModalOpen(true)} size="sm">
-            <Plus className="h-4 w-4 mr-2" />
-            {t("logWeight")}
+          <Button onClick={() => setIsModalOpen(true)} size="default" className="touch-target">
+            <Plus className="h-4 w-4 mr-1 sm:mr-2" />
+            <span className="hidden sm:inline">{t("logWeight")}</span>
+            <span className="sm:hidden">Log</span>
           </Button>
         </div>
 
         {latestWeight ? (
-          <div className="space-y-4">
-            <div className="flex items-baseline gap-3">
-              <span className="text-3xl font-bold">{latestWeight.weight}</span>
-              <span className="text-muted-foreground">{t("kg")}</span>
+          <div className="space-y-2 sm:space-y-4">
+            <div className="flex flex-wrap items-baseline gap-2 sm:gap-3">
+              <span className="text-2xl sm:text-3xl font-bold">{latestWeight.weight}</span>
+              <span className="text-muted-foreground text-sm sm:text-base">{t("kg")}</span>
               {weightChange && (
                 <div className={cn(
-                  "flex items-center gap-1 text-sm",
+                  "flex items-center gap-1 text-xs sm:text-sm",
                   weightChange.amount > 0 ? "text-destructive" : "text-green-600"
                 )}>
                   {weightChange.amount > 0 ? (
-                    <TrendingUp className="h-4 w-4" />
+                    <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4" />
                   ) : (
-                    <TrendingDown className="h-4 w-4" />
+                    <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4" />
                   )}
                   <span>
                     {weightChange.amount > 0 ? "+" : ""}
@@ -123,49 +125,52 @@ export function WeightTracker() {
                 </div>
               )}
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {t("lastLogged")}: {formatDate(latestWeight.date)}
             </p>
           </div>
         ) : (
-          <div className="text-center py-8 text-muted-foreground">
-            <Scale className="h-12 w-12 mx-auto mb-2 opacity-50" />
-            <p>{t("noWeightEntries")}</p>
+          <div className="text-center py-6 sm:py-8 text-muted-foreground">
+            <Scale className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-2 opacity-50" />
+            <p className="text-sm sm:text-base">{t("noWeightEntries")}</p>
             <p className="text-xs mt-1">{t("logFirstWeight")}</p>
           </div>
         )}
       </Card>
 
+      {/* Weight Chart - Responsive height */}
       {chartData.length > 0 && (
-        <Card className="p-6">
-          <h4 className="text-sm font-medium mb-4">{t("weightProgress")}</h4>
-          <ChartContainer config={chartConfig} className="h-[300px]">
+        <Card className="p-4 sm:p-6">
+          <h4 className="text-xs sm:text-sm font-medium mb-3 sm:mb-4">{t("weightProgress")}</h4>
+          <ChartContainer config={chartConfig} className="h-[200px] sm:h-[300px]">
             <LineChart 
               data={chartData}
-              margin={{ top: 5, right: 10, left: 0, bottom: 0 }}
+              margin={{ top: 5, right: 5, left: -10, bottom: 0 }}
             >
               <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
               <XAxis 
                 dataKey="date" 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 10 }}
                 angle={-45}
                 textAnchor="end"
-                height={60}
+                height={50}
                 stroke="#6b7280"
+                interval="preserveStartEnd"
               />
               <YAxis 
-                tick={{ fontSize: 12 }}
+                tick={{ fontSize: 10 }}
                 domain={['dataMin - 2', 'dataMax + 2']}
                 stroke="#6b7280"
+                width={35}
               />
               <ChartTooltip content={<ChartTooltipContent />} />
               <Line 
                 type="monotone" 
                 dataKey="weight" 
                 stroke="#3b82f6" 
-                strokeWidth={3}
-                dot={{ r: 5, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
-                activeDot={{ r: 7, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
+                strokeWidth={2}
+                dot={{ r: 3, fill: "#3b82f6", strokeWidth: 1, stroke: "#fff" }}
+                activeDot={{ r: 5, fill: "#3b82f6", strokeWidth: 2, stroke: "#fff" }}
                 connectNulls={false}
                 isAnimationActive={true}
               />
@@ -174,24 +179,25 @@ export function WeightTracker() {
         </Card>
       )}
 
+      {/* Recent Entries - Touch-friendly list */}
       {weightEntries.length > 0 && (
-        <Card className="p-6">
-          <h4 className="text-sm font-medium mb-4">{t("recentEntries")}</h4>
+        <Card className="p-4 sm:p-6">
+          <h4 className="text-xs sm:text-sm font-medium mb-3 sm:mb-4">{t("recentEntries")}</h4>
           <div className="space-y-2">
             {weightEntries.slice(0, 5).map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 active:bg-accent/70 transition-colors"
               >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{entry.weight} {t("kg")}</span>
-                    <span className="text-xs text-muted-foreground">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                    <span className="font-semibold text-sm sm:text-base">{entry.weight} {t("kg")}</span>
+                    <span className="text-[11px] sm:text-xs text-muted-foreground">
                       {formatDate(entry.date)}
                     </span>
                   </div>
                   {entry.notes && (
-                    <p className="text-xs text-muted-foreground mt-1">{entry.notes}</p>
+                    <p className="text-[11px] sm:text-xs text-muted-foreground mt-1 truncate">{entry.notes}</p>
                   )}
                 </div>
                 <Button
@@ -201,7 +207,7 @@ export function WeightTracker() {
                     setEntryToDelete(entry)
                     setIsDeleteDialogOpen(true)
                   }}
-                  className="h-8 w-8 text-destructive hover:text-destructive"
+                  className="h-9 w-9 sm:h-10 sm:w-10 text-destructive hover:text-destructive touch-target shrink-0 ml-2"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>

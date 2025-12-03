@@ -253,32 +253,32 @@ export function ActivityFeedItem({
   const isNotificationActivity = activity.activityType === "activity_liked" || activity.activityType === "activity_commented"
 
   return (
-    <Card className="p-4 hover:bg-muted/30 transition-colors">
-      <div className="flex gap-3">
+    <Card className="p-3 sm:p-4 hover:bg-muted/30 active:bg-muted/50 transition-colors">
+      <div className="flex gap-2 sm:gap-3">
         {/* User Avatar */}
         <div className="flex-shrink-0 relative">
-          <Avatar className="h-10 w-10">
+          <Avatar className="h-9 w-9 sm:h-10 sm:w-10">
             <AvatarImage src={activity.avatarUrl || undefined} alt={activity.username || "User"} />
-            <AvatarFallback className="bg-primary/10 text-primary text-sm">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs sm:text-sm">
               {activity.username?.slice(0, 2).toUpperCase() || "U"}
             </AvatarFallback>
           </Avatar>
           {/* Activity type indicator */}
-          <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full ${config.bgClass} flex items-center justify-center border-2 border-background`}>
-            <Icon className={`w-3 h-3 ${config.colorClass}`} />
+          <div className={`absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full ${config.bgClass} flex items-center justify-center border-2 border-background`}>
+            <Icon className={`w-2.5 h-2.5 sm:w-3 sm:h-3 ${config.colorClass}`} />
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           {/* Main message */}
-          <p className="font-medium text-sm">
+          <p className="font-medium text-xs sm:text-sm leading-snug">
             {getActivityMessage()}
           </p>
 
           {/* Reference date */}
           {activity.referenceDate && !isNotificationActivity && (
-            <div className="flex items-center gap-1 mt-1 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1 mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-muted-foreground">
               <Calendar className="w-3 h-3" />
               <span>{formatReferenceDate(activity.referenceDate)}</span>
             </div>
@@ -286,7 +286,7 @@ export function ActivityFeedItem({
 
           {/* Comment preview for notification activities */}
           {activity.activityType === "activity_commented" && activity.metadata.comment && (
-            <p className="text-sm text-muted-foreground mt-1 italic">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1 italic line-clamp-2">
               "{activity.metadata.comment}"
             </p>
           )}
@@ -296,12 +296,12 @@ export function ActivityFeedItem({
             activity.activityType === "workout_planned") &&
             activity.metadata.exercises &&
             activity.metadata.exercises.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-2">
+              <div className="flex flex-wrap gap-1 mt-1.5 sm:mt-2">
                 {getExercisesDisplay().map((exercise, index) => (
                   <Badge
                     key={index}
                     variant="secondary"
-                    className="text-xs font-normal"
+                    className="text-[10px] sm:text-xs font-normal px-1.5 sm:px-2 py-0.5"
                   >
                     {exercise}
                   </Badge>
