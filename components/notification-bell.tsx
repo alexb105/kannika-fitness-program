@@ -28,31 +28,35 @@ export function NotificationBell() {
         <Button
           variant="ghost"
           size="icon"
-          className="relative"
+          className="relative h-9 w-9 sm:h-10 sm:w-10 touch-target"
           title="Notifications"
         >
-          <Bell className="h-4 w-4" />
+          <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
           {hasNotifications && (
-            <span className="absolute top-0 right-0 h-2 w-2 bg-destructive rounded-full border-2 border-background" />
+            <span className="absolute top-1 right-1 sm:top-0 sm:right-0 h-2 w-2 bg-destructive rounded-full border-2 border-background animate-pulse" />
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-0" align="end">
-        <div className="p-4 border-b">
-          <h3 className="font-semibold">Friend Requests</h3>
-          <p className="text-sm text-muted-foreground">
+      <PopoverContent 
+        className="w-[calc(100vw-24px)] sm:w-80 p-0 max-h-[70vh] overflow-hidden" 
+        align="end"
+        sideOffset={8}
+      >
+        <div className="p-3 sm:p-4 border-b">
+          <h3 className="font-semibold text-sm sm:text-base">Friend Requests</h3>
+          <p className="text-xs sm:text-sm text-muted-foreground">
             {pendingRequests.length} pending request{pendingRequests.length !== 1 ? "s" : ""}
           </p>
         </div>
-        <div className="max-h-96 overflow-y-auto">
+        <div className="max-h-[50vh] overflow-y-auto overscroll-contain">
           {loading ? (
             <div className="p-4 text-sm text-muted-foreground text-center">
               Loading...
             </div>
           ) : pendingRequests.length === 0 ? (
-            <div className="p-8 text-center">
-              <Bell className="h-8 w-8 text-muted-foreground/50 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">No pending requests</p>
+            <div className="p-6 sm:p-8 text-center">
+              <Bell className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-xs sm:text-sm text-muted-foreground">No pending requests</p>
             </div>
           ) : (
             <div className="divide-y">

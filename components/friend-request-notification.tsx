@@ -49,13 +49,13 @@ export function FriendRequestNotification({
   }
 
   return (
-    <div className="p-4 hover:bg-accent transition-colors">
-      <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
-          <User className="h-5 w-5 text-primary" />
+    <div className="p-3 sm:p-4 hover:bg-accent transition-colors active:bg-accent">
+      <div className="flex items-start gap-2.5 sm:gap-3">
+        <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-full bg-primary/10 shrink-0">
+          <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium">
+          <p className="text-sm font-medium truncate">
             {request.sender_username || "Unknown User"}
           </p>
           <p className="text-xs text-muted-foreground">
@@ -63,24 +63,24 @@ export function FriendRequestNotification({
           </p>
         </div>
       </div>
-      <div className="flex gap-2 mt-3">
+      <div className="flex gap-2 mt-2.5 sm:mt-3">
         <Button
           size="sm"
-          className="flex-1"
+          className="flex-1 h-10 sm:h-9 text-xs sm:text-sm"
           onClick={handleAccept}
           disabled={processing}
         >
-          <Check className="h-3 w-3 mr-1" />
+          <Check className="h-3.5 w-3.5 sm:h-3 sm:w-3 mr-1" />
           Accept
         </Button>
         <Button
           size="sm"
           variant="outline"
-          className="flex-1"
+          className="flex-1 h-10 sm:h-9 text-xs sm:text-sm"
           onClick={handleDecline}
           disabled={processing}
         >
-          <X className="h-3 w-3 mr-1" />
+          <X className="h-3.5 w-3.5 sm:h-3 sm:w-3 mr-1" />
           Decline
         </Button>
       </div>

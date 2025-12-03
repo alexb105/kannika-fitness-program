@@ -34,65 +34,70 @@ export function Navbar() {
 
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ios-blur safe-top">
-      <div className="container mx-auto flex h-14 sm:h-16 items-center justify-between px-4 md:px-8 safe-x">
+      <div className="flex h-14 sm:h-16 items-center justify-between px-3 sm:px-4 md:px-8 safe-x">
         {/* Left side - Back button (if not on home) and Logo/Title */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-1">
           {showBackButton && (
             <Button
               variant="ghost"
               size="icon"
               onClick={handleBack}
-              className="h-10 w-10 touch-target"
+              className="h-9 w-9 sm:h-10 sm:w-10 touch-target shrink-0"
               aria-label={t("back")}
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
           )}
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
-              <Dumbbell className="h-5 w-5 text-primary-foreground" />
+          <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+            <div className="flex h-8 w-8 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-primary shrink-0">
+              <Dumbbell className="h-4 w-4 sm:h-5 sm:w-5 text-primary-foreground" />
             </div>
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold tracking-tight text-foreground">
+            <div className="flex flex-col min-w-0">
+              <h1 className="text-sm sm:text-lg md:text-xl font-bold tracking-tight text-foreground truncate">
                 {t("fitnessSchedule")}
               </h1>
               {username && (
-                <p className="text-xs text-muted-foreground">@{username}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">@{username}</p>
               )}
             </div>
           </div>
         </div>
 
         {/* Right side - Navigation and actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-0.5 sm:gap-1 md:gap-2 shrink-0">
           {user && pathname !== "/login" && (
             <>
-              {/* Friends Button */}
+              {/* Friends Button - Icon only on mobile */}
               <Button
                 variant="ghost"
-                size="sm"
+                size="icon"
                 onClick={() => setIsFriendsOpen(true)}
-                className="h-10 w-10 sm:w-auto sm:px-3 gap-2 touch-target"
+                className="h-9 w-9 sm:h-10 sm:w-10 touch-target"
                 title="Friends"
               >
-                <Users className="h-5 w-5" />
-                <span className="hidden sm:inline">Friends</span>
+                <Users className="h-4 w-4 sm:h-5 sm:w-5" />
               </Button>
-              {/* Weight Tracking Button */}
+              
+              {/* Weight Tracking Button - Icon only on mobile */}
               {!isWeightPage && (
                 <Button
                   variant="ghost"
-                  size="sm"
+                  size="icon"
                   onClick={handleWeightTracking}
-                  className="h-10 w-10 sm:w-auto sm:px-3 gap-2 touch-target"
+                  className="h-9 w-9 sm:h-10 sm:w-10 touch-target"
                   title={t("weightTracking")}
                 >
-                  <Scale className="h-5 w-5" />
-                  <span className="hidden sm:inline">{t("weightTracking")}</span>
+                  <Scale className="h-4 w-4 sm:h-5 sm:w-5" />
                 </Button>
               )}
+              
+              {/* Language Switcher */}
               <LanguageSwitcher />
+              
+              {/* Notification Bell */}
               <NotificationBell />
+              
+              {/* Profile Menu */}
               <ProfileMenu />
             </>
           )}
@@ -100,11 +105,13 @@ export function Navbar() {
 
         {/* Friends Dialog */}
         <Dialog open={isFriendsOpen} onOpenChange={setIsFriendsOpen}>
-          <DialogContent className="sm:max-w-md">
+          <DialogContent className="sm:max-w-md max-h-[85vh] overflow-hidden flex flex-col">
             <DialogHeader>
               <DialogTitle>Friends</DialogTitle>
             </DialogHeader>
-            <FriendsList />
+            <div className="overflow-y-auto flex-1">
+              <FriendsList />
+            </div>
           </DialogContent>
         </Dialog>
       </div>
